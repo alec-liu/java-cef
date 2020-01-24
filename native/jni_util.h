@@ -11,6 +11,7 @@
 #include "include/cef_browser.h"
 #include "include/cef_frame.h"
 #include "include/cef_request_handler.h"
+#include "include/cef_x509_certificate.h"
 #include "include/wrapper/cef_message_router.h"
 #include "util.h"
 
@@ -100,6 +101,7 @@ void GetJNIStringArray(JNIEnv* env,
                        std::vector<CefString>& vals);
 
 CefMessageRouterConfig GetJNIMessageRouterConfig(JNIEnv* env, jobject jConfig);
+
 
 // Create a new JNI error code.
 jobject NewJNIErrorCode(JNIEnv* env, cef_errorcode_t errorCode);
@@ -235,8 +237,23 @@ jobject GetJNIBrowser(JNIEnv* env, CefRefPtr<CefBrowser>);
 // Get the existing CEF browser counterpart.
 CefRefPtr<CefBrowser> GetCefBrowser(JNIEnv* env, jobject jbrowser);
 
+
+
 // TODO: Remove this method once all callers are converted to scoped helpers.
 jobject GetJNIBrowser(CefRefPtr<CefBrowser>);
+
+CefRefPtr<CefX509Certificate> GetJNIX509Certificate(JNIEnv* env, jobject jX509Certificate);
+
+
+jobjectArray NewJNIX509CertificateArray(
+    JNIEnv* env,
+    const CefRequestHandler::X509CertificateList& certs);
+
+
+jobject NewJNIX509Certificate(JNIEnv* env,
+                              CefRefPtr<CefX509Certificate> cert,
+                              jsize position);
+
 
 jobject NewJNITransitionType(JNIEnv* env,
                              CefRequest::TransitionType transitionType);

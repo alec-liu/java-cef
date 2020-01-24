@@ -27,6 +27,8 @@ import org.cef.network.CefRequest;
 import org.cef.network.CefRequest.TransitionType;
 import org.cef.network.CefResponse;
 import org.cef.network.CefURLRequest;
+import org.cef.security.CefX509Certificate;
+import org.cef.callback.CefSelectClientCertificateCallback;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -298,4 +300,10 @@ class TestFrame extends JFrame implements CefLifeSpanHandler, CefLoadHandler, Ce
     @Override
     public void onProtocolExecution(
             CefBrowser browser, CefFrame frame, CefRequest request, BoolRef allowOsExecution) {}
+                                              
+    @Override
+    public boolean onSelectClientCertificate(CefBrowser browser, boolean isProxy, String host, int port,CefX509Certificate[] certificates, CefSelectClientCertificateCallback callback) {
+                                                  // TODO Auto-generated method stub
+                                                  return false;
+                                              }
 }

@@ -15,8 +15,10 @@
 #include "include/cef_request.h"
 #include "include/cef_response.h"
 #include "include/wrapper/cef_message_router.h"
-
+#include "include/cef_request_context_handler.h"
 #include "jni_util.h"
+#include "include/cef_x509_certificate.h"
+#include "include/cef_request_handler.h"
 
 //
 // --------
@@ -615,6 +617,16 @@ class ScopedJNIAuthCallback : public ScopedJNIObject<CefAuthCallback> {
   ScopedJNIAuthCallback(JNIEnv* env, CefRefPtr<CefAuthCallback> obj = NULL);
 };
 
+// JNI CefSelectClientCertificateCallback object.
+class ScopedJNISelectClientCertificateCallback : public ScopedJNIObject<CefSelectClientCertificateCallback> {
+ public:
+  // If |obj| is NULL the SetHandle method should be used.
+  ScopedJNISelectClientCertificateCallback(JNIEnv* env, CefRefPtr<CefSelectClientCertificateCallback> obj = NULL);
+};
+
+
+
+
 // JNI CefDragData object.
 class ScopedJNIDragData : public ScopedJNIObject<CefDragData> {
  public:
@@ -706,5 +718,11 @@ class ScopedJNIStringRef : public ScopedJNIBase<jobject> {
   // Implicit retrieval of the underlying value.
   operator CefString() const;
 };
+
+
+
+
+
+
 
 #endif  // JCEF_NATIVE_SCOPED_HELPERS_H_
