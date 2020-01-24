@@ -5,6 +5,7 @@
 #include "jni_util.h"
 
 #include <jawt.h>
+
 #include <algorithm>
 
 #include "client_handler.h"
@@ -1479,3 +1480,83 @@ bool IsJNIEnumValue(JNIEnv* env,
   }
   return false;
 }
+CefRefPtr<CefX509Certificate> GetJNIX509Certificate(JNIEnv* env,
+                                                    jobject jX509Certificate) {
+  // to retrieve the related CefRefPtr<CefX509Certificate> with the
+  // CefX509Certificate interface
+  jclass cls = FindClass(env, "org.cef.security.CefX509Certificate");
+  jmethodID methodID = env->GetMethodID(cls, "getIndex", "()[B");
+    if (methodID) {
+   
+     jint choosencertificateposition= env->CallIntMethod(jX509Certificate, methodID);
+
+
+  
+
+    }
+    env->ExceptionClear();
+    
+          
+  return NULL;
+}
+
+jobjectArray NewJNIX509CertificateArray(
+    JNIEnv* env,
+    const CefRequestHandler::X509CertificateList& certs) {
+  if (certs.empty())
+    return NULL;
+
+  jclass cls = FindClass(env, "org/cef/security/CefX509Certificate");
+  if (!cls)
+    return NULL;
+
+  jobjectArray arr =
+      env->NewObjectArray(static_cast<jsize>(certs.size()), cls, NULL);
+
+  for (jsize i = 0; i < static_cast<jsize>(certs.size()); i++) {
+    jobject rect_obj = NewJNIX509Certificate(env, certs.at(i),i);
+    env->SetObjectArrayElement(arr, i, rect_obj);
+    env->DeleteLocalRef(rect_obj);
+  }
+
+  return arr;
+}
+
+jobject NewJNIX509Certificate(JNIEnv* env,
+                              CefRefPtr<CefX509Certificate> cert,
+                              jsize position) {
+  jclass cls = FindClass(env, "org/cef/security/CefX509Certificate");
+  if (!cls)
+    return NULL;
+
+  jobject obj = NewJNIObject(env, cls);
+  if (!obj)
+    return NULL;
+
+  SetJNIFieldInt(env, cls, obj, "index", position);
+
+  CefX509Certificate::IssuerChainBinaryList der_chain_list;//std::vector<CefRefPtr<CefBinaryValue>>
+  cert->GetDEREncodedIssuerChain(der_chain_list);
+  der_chain_list.insert(der_chain_list.begin(), cert->GetDEREncoded());
+
+
+ 
+
+ std::vector<CefRefPtr<CefBinaryValue>>::const_iterator iter;
+
+  for (iter = der_chain_list.begin(); iter != der_chain_list.end(); ++iter) {
+
+    jmethodID writeBufferMethodID =
+        env->GetMethodID(cls, "addDEREncodedCertificateToTheChain", "([B)V");
+    jbyteArray derarray =
+           env->NewByteArray((jsize)iter->get()->GetSize());
+    void* temp = env->GetPrimitiveArrayCritical((jarray)derarray, 0);
+    iter->get()->GetData(temp, iter->get()->GetSize(), 0);
+    env->CallVoidMethod(obj, writeBufferMethodID, derarray);
+    env->ReleasePrimitiveArrayCritical(derarray, temp, 0);
+    
+  }
+
+  return obj;
+}
+

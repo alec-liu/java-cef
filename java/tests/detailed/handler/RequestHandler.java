@@ -8,6 +8,7 @@ import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.callback.CefAuthCallback;
 import org.cef.callback.CefRequestCallback;
+import org.cef.callback.CefSelectClientCertificateCallback;
 import org.cef.handler.CefLoadHandler.ErrorCode;
 import org.cef.handler.CefRequestHandler;
 import org.cef.handler.CefResourceHandler;
@@ -17,11 +18,14 @@ import org.cef.misc.BoolRef;
 import org.cef.network.CefPostData;
 import org.cef.network.CefPostDataElement;
 import org.cef.network.CefRequest;
+import org.cef.security.CefX509Certificate;
 
 import java.awt.Frame;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Vector;
 
+import javax.security.cert.X509Certificate;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -169,4 +173,27 @@ public class RequestHandler extends CefResourceRequestHandlerAdapter implements 
     public void onRenderProcessTerminated(CefBrowser browser, TerminationStatus status) {
         System.out.println("render process terminated: " + status);
     }
+
+	@Override
+	public boolean onSelectClientCertificate(CefBrowser browser, boolean isProxy, String host, int port,
+			CefX509Certificate[] certificates, CefSelectClientCertificateCallback callback) {
+		 System.out.println("onSelectClientCertificate");
+		 StringBuilder sb=new StringBuilder();;
+		int loopindex=0;
+		for( CefX509Certificate certif:certificates)
+		{
+			
+			sb.append("Certificate "+loopindex +"(choice index)----"+"\n");
+			sb.append(certif.toString());
+			
+			
+			sb.append("-----------------------------"+"\n");
+			loopindex++;
+		}
+		 System.out.println(sb.toString());
+		
+		
+		 callback.Select(certificates[0]);
+		return true;
+	}
 }

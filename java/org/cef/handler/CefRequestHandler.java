@@ -8,9 +8,13 @@ import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.callback.CefAuthCallback;
 import org.cef.callback.CefRequestCallback;
+import org.cef.callback.CefSelectClientCertificateCallback;
 import org.cef.misc.BoolRef;
 import org.cef.network.CefRequest;
 import org.cef.network.CefURLRequest;
+import org.cef.security.CefX509Certificate;
+
+
 
 /**
  * Implement this interface to handle events related to browser requests. The methods of this class
@@ -115,6 +119,15 @@ public interface CefRequestHandler {
      */
     boolean onCertificateError(CefBrowser browser, CefLoadHandler.ErrorCode cert_error,
             String request_url, CefRequestCallback callback);
+
+
+	boolean onSelectClientCertificate(CefBrowser browser, 
+      boolean isProxy,
+      String host,
+      int port,
+      final CefX509Certificate[] certificates,
+      CefSelectClientCertificateCallback callback);
+
 
     /**
      * Called on the browser process UI thread when a plugin has crashed.
