@@ -37,5 +37,6 @@ else
   ./make_jni_header.sh $1 org.cef.network.CefURLRequest_N
   ./make_jni_header.sh $1 org.cef.network.CefWebPluginInfo_N
   ./make_jni_header.sh $1 org.cef.network.CefWebPluginManager_N
+  ./make_jni_header.sh $1 org.cef.callback.CefSelectClientCertificateCallback_N
 fi
 

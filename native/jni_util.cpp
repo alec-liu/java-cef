@@ -1489,7 +1489,11 @@ CefRefPtr<CefX509Certificate> GetJNIX509Certificate(JNIEnv* env,
     if (methodID) {
    
      jint choosencertificateposition= env->CallIntMethod(jX509Certificate, methodID);
-
+      choosencertificateposition =
+          choosencertificateposition;  // here we should find the Certificate
+                                       // coming from the
+                                       // OnSelectClientCertificate Certificates
+                                       // list
 
   
 

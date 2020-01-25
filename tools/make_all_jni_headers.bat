@@ -46,6 +46,7 @@ call make_jni_header.bat %1 org.cef.network.CefResponse_N
 call make_jni_header.bat %1 org.cef.network.CefURLRequest_N
 call make_jni_header.bat %1 org.cef.network.CefWebPluginInfo_N
 call make_jni_header.bat %1 org.cef.network.CefWebPluginManager_N
+call make_jni_header.bat %1 org.cef.callback.CefSelectClientCertificateCallback_N
 
 :end
 endlocal & set RC=%ERRORLEVEL%
