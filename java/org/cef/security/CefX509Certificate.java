@@ -2,6 +2,7 @@ package org.cef.security;
 
 import javax.security.cert.X509Certificate;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
@@ -10,7 +11,11 @@ import javax.security.cert.CertificateException;
 
 public final class CefX509Certificate {
 
-	int index=0;
+	
+	private ByteBuffer address2linkedcertificate; //pointer 2 linked  CefRefPtr<CefX509Certificate> cert
+	
+	
+	
 	ArrayList<X509Certificate> chainofcertificates = new ArrayList<X509Certificate>();
 
 	public CefX509Certificate() {
@@ -25,13 +30,6 @@ public final class CefX509Certificate {
 
 	}
 
-	public int getIndex() {
-		return index;
-	}
-
-	public void setIndex(int index) {
-		this.index = index;
-	}
 	
 	public X509Certificate getSubjectCertificate() throws Exception {
 		if(!chainofcertificates.isEmpty())
@@ -51,7 +49,7 @@ public final class CefX509Certificate {
 		}else
 		{	
 			if(!chainofcertificates.isEmpty())
-			throw new Exception("This is a selfsigned certificate... no issuer are present");
+			throw new Exception("No issuers were present");
 			else
 			throw new Exception("CefX509Certificate hasn' been initialized: no certificates");
 		}
@@ -63,7 +61,7 @@ public final class CefX509Certificate {
 	public String toString()
 	{
 		StringBuilder sb=new StringBuilder();
-		sb.append("Position="+this.getIndex() );
+		
 		sb.append("\n");
 		int loopindex=0;
 		for(X509Certificate certif:chainofcertificates)
@@ -78,5 +76,7 @@ public final class CefX509Certificate {
 		
 		return sb.toString();
 	}
+
+	
 		
 }

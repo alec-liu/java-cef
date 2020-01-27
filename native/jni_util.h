@@ -242,6 +242,18 @@ CefRefPtr<CefBrowser> GetCefBrowser(JNIEnv* env, jobject jbrowser);
 // TODO: Remove this method once all callers are converted to scoped helpers.
 jobject GetJNIBrowser(CefRefPtr<CefBrowser>);
 
+
+bool SetJNIFieldByteBuffer(JNIEnv* env,
+                           jclass cls,
+                           jobject obj,
+                           const char* field_name,
+                           void* address,
+                           jlong size);
+
+
+void* GetJNIFieldByteBuffer(JNIEnv* env,jclass cls,jobject obj,const char* field_name);
+
+
 CefRefPtr<CefX509Certificate> GetJNIX509Certificate(JNIEnv* env, jobject jX509Certificate);
 
 
@@ -251,8 +263,7 @@ jobjectArray NewJNIX509CertificateArray(
 
 
 jobject NewJNIX509Certificate(JNIEnv* env,
-                              CefRefPtr<CefX509Certificate> cert,
-                              jsize position);
+                              CefRefPtr<CefX509Certificate> cert);
 
 
 jobject NewJNITransitionType(JNIEnv* env,

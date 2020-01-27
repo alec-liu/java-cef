@@ -1480,28 +1480,53 @@ bool IsJNIEnumValue(JNIEnv* env,
   }
   return false;
 }
+
+bool SetJNIFieldByteBuffer(JNIEnv* env,
+                    jclass cls,
+                    jobject obj,
+                    const char* field_name,
+                    void* address,jlong size) {
+  jfieldID field =
+      env->GetFieldID(cls, field_name, "Ljava/nio/ByteBuffer;");
+  if (field) {
+    jobject buffer=env->NewDirectByteBuffer(address, size);
+    env->SetObjectField(obj, field, buffer);
+    return true;
+  }
+  env->ExceptionClear();
+  return false;
+}
+
+void* GetJNIFieldByteBuffer(JNIEnv* env,
+                    jclass cls,
+                    jobject obj,
+                    const char* field_name) {
+  jfieldID field = env->GetFieldID(cls, field_name, "Ljava/nio/ByteBuffer;");
+  if (field) {
+
+    jobject buffer=  env->GetObjectField(obj, field);
+      return  env->GetDirectBufferAddress(buffer);
+    
+  }
+  env->ExceptionClear();
+  return NULL;
+}
+
+
+
+
+
+
 CefRefPtr<CefX509Certificate> GetJNIX509Certificate(JNIEnv* env,
                                                     jobject jX509Certificate) {
   // to retrieve the related CefRefPtr<CefX509Certificate> with the
   // CefX509Certificate interface
   jclass cls = FindClass(env, "org.cef.security.CefX509Certificate");
-  jmethodID methodID = env->GetMethodID(cls, "getIndex", "()[B");
-    if (methodID) {
-   
-     jint choosencertificateposition= env->CallIntMethod(jX509Certificate, methodID);
-      choosencertificateposition =
-          choosencertificateposition;  // here we should find the Certificate
-                                       // coming from the
-                                       // OnSelectClientCertificate Certificates
-                                       // list
-
-  
-
-    }
-    env->ExceptionClear();
+  void * result= GetJNIFieldByteBuffer(env, cls, jX509Certificate, "address2linkedcertificate");
+CefRefPtr<CefX509Certificate> ret =((CefX509Certificate *)result);
     
-          
-  return NULL;
+    env->ExceptionClear();
+    return ret;
 }
 
 jobjectArray NewJNIX509CertificateArray(
@@ -1518,7 +1543,7 @@ jobjectArray NewJNIX509CertificateArray(
       env->NewObjectArray(static_cast<jsize>(certs.size()), cls, NULL);
 
   for (jsize i = 0; i < static_cast<jsize>(certs.size()); i++) {
-    jobject rect_obj = NewJNIX509Certificate(env, certs.at(i),i);
+    jobject rect_obj = NewJNIX509Certificate(env, certs.at(i));
     env->SetObjectArrayElement(arr, i, rect_obj);
     env->DeleteLocalRef(rect_obj);
   }
@@ -1527,8 +1552,7 @@ jobjectArray NewJNIX509CertificateArray(
 }
 
 jobject NewJNIX509Certificate(JNIEnv* env,
-                              CefRefPtr<CefX509Certificate> cert,
-                              jsize position) {
+                              CefRefPtr<CefX509Certificate> cert) {
   jclass cls = FindClass(env, "org/cef/security/CefX509Certificate");
   if (!cls)
     return NULL;
@@ -1537,7 +1561,12 @@ jobject NewJNIX509Certificate(JNIEnv* env,
   if (!obj)
     return NULL;
 
-  SetJNIFieldInt(env, cls, obj, "index", position);
+  
+
+  SetJNIFieldByteBuffer(env, cls, obj, "address2linkedcertificate", cert.get(),
+                        sizeof(cert));
+  
+
 
   CefX509Certificate::IssuerChainBinaryList der_chain_list;//std::vector<CefRefPtr<CefBinaryValue>>
   cert->GetDEREncodedIssuerChain(der_chain_list);

@@ -192,7 +192,7 @@ public class RequestHandler extends CefResourceRequestHandlerAdapter implements 
 		}
 		 System.out.println(sb.toString());
 		
-		
+		//using the first certif in the list 
 		 callback.Select(certificates[0]);
 		return true;
 	}
