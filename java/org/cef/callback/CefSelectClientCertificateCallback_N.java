@@ -11,7 +11,7 @@ class CefSelectClientCertificateCallback_N extends CefNativeAdapter implements C
 
     @Override
     protected void finalize() throws Throwable {
-        
+    	cancel();
         super.finalize();
     }
 
@@ -25,7 +25,18 @@ class CefSelectClientCertificateCallback_N extends CefNativeAdapter implements C
         }
     }
 
+    @Override
+    public void cancel() {
+        try {
+            N_Cancel(getNativeRef(null));
+        } catch (UnsatisfiedLinkError ule) {
+            ule.printStackTrace();
+        }
+    }
+
+    
     
     private final native void N_Select(long self,CefX509Certificate selectedcertif);
+    private final native void N_Cancel(long self);
     
 }

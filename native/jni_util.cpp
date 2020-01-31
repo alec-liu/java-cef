@@ -1481,36 +1481,7 @@ bool IsJNIEnumValue(JNIEnv* env,
   return false;
 }
 
-bool SetJNIFieldByteBuffer(JNIEnv* env,
-                    jclass cls,
-                    jobject obj,
-                    const char* field_name,
-                    void* address,jlong size) {
-  jfieldID field =
-      env->GetFieldID(cls, field_name, "Ljava/nio/ByteBuffer;");
-  if (field) {
-    jobject buffer=env->NewDirectByteBuffer(address, size);
-    env->SetObjectField(obj, field, buffer);
-    return true;
-  }
-  env->ExceptionClear();
-  return false;
-}
 
-void* GetJNIFieldByteBuffer(JNIEnv* env,
-                    jclass cls,
-                    jobject obj,
-                    const char* field_name) {
-  jfieldID field = env->GetFieldID(cls, field_name, "Ljava/nio/ByteBuffer;");
-  if (field) {
-
-    jobject buffer=  env->GetObjectField(obj, field);
-      return  env->GetDirectBufferAddress(buffer);
-    
-  }
-  env->ExceptionClear();
-  return NULL;
-}
 
 
 
@@ -1519,19 +1490,12 @@ void* GetJNIFieldByteBuffer(JNIEnv* env,
 
 CefRefPtr<CefX509Certificate> GetJNIX509Certificate(JNIEnv* env,
                                                     jobject jX509Certificate) {
-  // to retrieve the related CefRefPtr<CefX509Certificate> with the
-  // CefX509Certificate interface
-  jclass cls = FindClass(env, "org.cef.security.CefX509Certificate");
-  void * result= GetJNIFieldByteBuffer(env, cls, jX509Certificate, "address2linkedcertificate");
-CefRefPtr<CefX509Certificate> ret =((CefX509Certificate *)result);
-    
-    env->ExceptionClear();
-    return ret;
+  return GetCefFromJNIObject<CefX509Certificate>(env, jX509Certificate,
+                                                 "CefX509Certificate");
 }
 
 jobjectArray NewJNIX509CertificateArray(
-    JNIEnv* env,
-    const CefRequestHandler::X509CertificateList& certs) {
+    JNIEnv* env,  const CefRequestHandler::X509CertificateList& certs) {
   if (certs.empty())
     return NULL;
 
@@ -1543,34 +1507,30 @@ jobjectArray NewJNIX509CertificateArray(
       env->NewObjectArray(static_cast<jsize>(certs.size()), cls, NULL);
 
   for (jsize i = 0; i < static_cast<jsize>(certs.size()); i++) {
-    jobject rect_obj = NewJNIX509Certificate(env, certs.at(i));
-    env->SetObjectArrayElement(arr, i, rect_obj);
-    env->DeleteLocalRef(rect_obj);
+   
+       
+    env->SetObjectArrayElement(arr, i,
+                                  NewJNIX509Certificate(env, certs.at(i)));
+    
   }
 
   return arr;
 }
 
-jobject NewJNIX509Certificate(JNIEnv* env,
+jobject NewJNIX509Certificate(
+    JNIEnv* env,
                               CefRefPtr<CefX509Certificate> cert) {
   jclass cls = FindClass(env, "org/cef/security/CefX509Certificate");
   if (!cls)
     return NULL;
+  jmethodID writeBufferMethodID =
+      env->GetMethodID(cls, "addDEREncodedCertificateToTheChain", "([B)V");
+    
 
-  jobject obj = NewJNIObject(env, cls);
-  if (!obj)
-    return NULL;
-
-  
-
-  SetJNIFieldByteBuffer(env, cls, obj, "address2linkedcertificate", cert.get(),
-                        sizeof(cert));
-  
-
-
-  CefX509Certificate::IssuerChainBinaryList der_chain_list;//std::vector<CefRefPtr<CefBinaryValue>>
-  cert->GetDEREncodedIssuerChain(der_chain_list);
-  der_chain_list.insert(der_chain_list.begin(), cert->GetDEREncoded());
+ ScopedJNICefX509Certificate scopedcrt = ScopedJNICefX509Certificate(env, cert);
+ CefX509Certificate::IssuerChainBinaryList der_chain_list;//std::vector<CefRefPtr<CefBinaryValue>>
+ cert->GetDEREncodedIssuerChain(der_chain_list);
+ der_chain_list.insert(der_chain_list.begin(), cert->GetDEREncoded());
 
 
  
@@ -1579,17 +1539,17 @@ jobject NewJNIX509Certificate(JNIEnv* env,
 
   for (iter = der_chain_list.begin(); iter != der_chain_list.end(); ++iter) {
 
-    jmethodID writeBufferMethodID =
-        env->GetMethodID(cls, "addDEREncodedCertificateToTheChain", "([B)V");
     jbyteArray derarray =
            env->NewByteArray((jsize)iter->get()->GetSize());
     void* temp = env->GetPrimitiveArrayCritical((jarray)derarray, 0);
     iter->get()->GetData(temp, iter->get()->GetSize(), 0);
-    env->CallVoidMethod(obj, writeBufferMethodID, derarray);
+    env->CallVoidMethod(scopedcrt.get(), writeBufferMethodID, derarray);
     env->ReleasePrimitiveArrayCritical(derarray, temp, 0);
     
   }
 
-  return obj;
+  return scopedcrt.get();
+  
+ ;
 }
 

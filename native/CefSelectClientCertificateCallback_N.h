@@ -15,6 +15,14 @@ extern "C" {
 JNIEXPORT void JNICALL Java_org_cef_callback_CefSelectClientCertificateCallback_1N_N_1Select
   (JNIEnv *, jobject, jlong, jobject);
 
+/*
+ * Class:     org_cef_callback_CefSelectClientCertificateCallback_N
+ * Method:    N_Cancel
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_org_cef_callback_CefSelectClientCertificateCallback_1N_N_1Cancel
+  (JNIEnv *, jobject, jlong);
+
 #ifdef __cplusplus
 }
 #endif

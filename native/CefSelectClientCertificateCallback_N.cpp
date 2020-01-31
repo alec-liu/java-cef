@@ -32,4 +32,21 @@ JNIEXPORT void JNICALL Java_org_cef_callback_CefSelectClientCertificateCallback_
       ClearSelf(env,obj);
 	  
   }
+  
+/*
+ * Class:     org_cef_callback_CefSelectClientCertificateCallback_N
+ * Method:    N_Cancel
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_org_cef_callback_CefSelectClientCertificateCallback_1N_N_1Cancel(
+      JNIEnv* env,
+      jobject obj,
+      jlong self) {
+	    
+	  CefRefPtr<CefSelectClientCertificateCallback> callback = GetSelf(self);
+  if (!callback)
+    return;
+    ClearSelf(env,obj);
+  
+  }
 

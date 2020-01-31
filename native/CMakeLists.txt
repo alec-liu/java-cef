@@ -146,6 +146,8 @@ set(JCEF_SRCS
   write_handler.h
   CefSelectClientCertificateCallback_N.h
   CefSelectClientCertificateCallback_N.cpp
+  CefX509Certificate_N.h
+  CefX509Certificate_N.cpp
  )
 set(JCEF_SRCS_LINUX
   critical_wait_posix.cpp

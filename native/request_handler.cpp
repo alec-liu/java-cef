@@ -206,7 +206,7 @@ bool RequestHandler::OnSelectClientCertificate(
     return false;
   ScopedJNIBrowser jbrowser(env, browser);
   ScopedJNIString jhost(env, host);
-  ScopedJNIObjectLocal jcertificates(env,NewJNIX509CertificateArray(env,certificates));
+  jobjectArray jcertificates = NewJNIX509CertificateArray(env, certificates);
   ScopedJNISelectClientCertificateCallback jcallback(env, callback);
   jboolean jresult = JNI_FALSE;
   JNI_CALL_METHOD(
@@ -215,14 +215,14 @@ bool RequestHandler::OnSelectClientCertificate(
                   "String;I[Lorg/cef/security/CefX509Certificate;Lorg/cef/"
                   "callback/CefSelectClientCertificateCallback;)Z",
       Boolean, jresult, jbrowser.get(),(isProxy ? JNI_TRUE : JNI_FALSE), jhost.get(), port,
-      jcertificates.get(), jcallback.get());
+      jcertificates, jcallback.get());
 		  
 	if (jresult == JNI_FALSE) {
     // If the Java method returns "false" the callback won't be used and
     // the reference can therefore be removed.
     jcallback.SetTemporary();
   }
-
+  env->DeleteLocalRef(jcertificates);
   return (jresult != JNI_FALSE);
 }
 

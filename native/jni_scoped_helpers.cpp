@@ -79,6 +79,14 @@ ScopedJNISelectClientCertificateCallback::ScopedJNISelectClientCertificateCallba
                                        "org/cef/callback/CefSelectClientCertificateCallback_N",
                                        "CefSelectClientCertificateCallback") {}									   
 									   
+ScopedJNICefX509Certificate::ScopedJNICefX509Certificate(
+        JNIEnv* env,
+    CefRefPtr<CefX509Certificate> obj)
+    : ScopedJNIObject<CefX509Certificate>(
+          env,
+          obj,
+          "org/cef/security/CefX509Certificate_N",
+          "CefX509Certificate") {}									   
 
 									   
 

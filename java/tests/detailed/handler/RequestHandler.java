@@ -177,7 +177,7 @@ public class RequestHandler extends CefResourceRequestHandlerAdapter implements 
 	@Override
 	public boolean onSelectClientCertificate(CefBrowser browser, boolean isProxy, String host, int port,
 			CefX509Certificate[] certificates, CefSelectClientCertificateCallback callback) {
-		 System.out.println("onSelectClientCertificate");
+		 System.out.println("onSelectClientCertificate total nb" + certificates.length);
 		 StringBuilder sb=new StringBuilder();;
 		int loopindex=0;
 		for( CefX509Certificate certif:certificates)

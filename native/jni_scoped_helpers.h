@@ -624,6 +624,13 @@ class ScopedJNISelectClientCertificateCallback : public ScopedJNIObject<CefSelec
   ScopedJNISelectClientCertificateCallback(JNIEnv* env, CefRefPtr<CefSelectClientCertificateCallback> obj = NULL);
 };
 
+class ScopedJNICefX509Certificate : public ScopedJNIObject<CefX509Certificate> {
+ public:
+  // If |obj| is NULL the SetHandle method should be used.
+  ScopedJNICefX509Certificate(
+      JNIEnv* env,
+                              CefRefPtr<CefX509Certificate> obj = NULL);
+};
 
 
 

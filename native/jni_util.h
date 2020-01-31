@@ -243,15 +243,8 @@ CefRefPtr<CefBrowser> GetCefBrowser(JNIEnv* env, jobject jbrowser);
 jobject GetJNIBrowser(CefRefPtr<CefBrowser>);
 
 
-bool SetJNIFieldByteBuffer(JNIEnv* env,
-                           jclass cls,
-                           jobject obj,
-                           const char* field_name,
-                           void* address,
-                           jlong size);
 
 
-void* GetJNIFieldByteBuffer(JNIEnv* env,jclass cls,jobject obj,const char* field_name);
 
 
 CefRefPtr<CefX509Certificate> GetJNIX509Certificate(JNIEnv* env, jobject jX509Certificate);
@@ -262,7 +255,8 @@ jobjectArray NewJNIX509CertificateArray(
     const CefRequestHandler::X509CertificateList& certs);
 
 
-jobject NewJNIX509Certificate(JNIEnv* env,
+jobject NewJNIX509Certificate(
+    JNIEnv* env,
                               CefRefPtr<CefX509Certificate> cert);
 
 
