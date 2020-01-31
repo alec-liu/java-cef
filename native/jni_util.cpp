@@ -1548,7 +1548,7 @@ jobject NewJNIX509Certificate(
     
   }
 
-  return scopedcrt.get();
+  return scopedcrt.Release();
   
  ;
 }
