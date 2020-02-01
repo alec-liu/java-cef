@@ -8,6 +8,8 @@ import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.callback.CefAuthCallback;
 import org.cef.callback.CefRequestCallback;
+import org.cef.callback.CefSelectClientCertificateCallback;
+import org.cef.security.CefX509Certificate;
 import org.cef.handler.CefLoadHandler.ErrorCode;
 import org.cef.misc.BoolRef;
 import org.cef.network.CefRequest;
@@ -55,4 +57,20 @@ public abstract class CefRequestHandlerAdapter implements CefRequestHandler {
 
     @Override
     public void onRenderProcessTerminated(CefBrowser browser, TerminationStatus status) {}
+    
+    @Override
+    public boolean onSelectClientCertificate(CefBrowser browser,
+    boolean isProxy,
+    String host,
+    int port,
+    final CefX509Certificate[] certificates,
+    CefSelectClientCertificateCallback callback)
+    {
+        return false; //by defaut no callback
+        
+        
+        
+    }
+    
+    
 }
