@@ -18,7 +18,7 @@ class CefSelectClientCertificateCallback_N extends CefNativeAdapter implements C
     @Override
     public void Select(CefX509Certificate selectedcertif) {
         try {
-        System.out.println("CefSelectClientCertificateCallback_N");
+        
             N_Select(getNativeRef(null),selectedcertif);
         } catch (UnsatisfiedLinkError ule) {
             ule.printStackTrace();

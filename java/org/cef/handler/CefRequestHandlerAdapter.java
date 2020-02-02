@@ -67,9 +67,6 @@ public abstract class CefRequestHandlerAdapter implements CefRequestHandler {
     CefSelectClientCertificateCallback callback)
     {
         return false; //by defaut no callback
-        
-        
-        
     }
     
     

@@ -24,14 +24,11 @@ public final class CefX509Certificate_N extends CefX509Certificate implements Ce
 	@Override
 	public void addDEREncodedCertificateToTheChain(final byte[] buffer) {
 		try {
-			System.out.println("addDEREncodedCertificateToTheChain call");
+			
 			X509Certificate subjectcertificate = X509Certificate.getInstance(buffer);
 			chainofcertificates.add(subjectcertificate);
-			System.out.println("addDEREncodedCertificateToTheChain has added the following certificate");
-			System.out.println(subjectcertificate);
+			
 		} catch (Exception e) {
-			System.err.println("addDEREncodedCertificateToTheChain has failed");
-			System.err.println(this);
 			e.printStackTrace();
 
 		}
@@ -85,7 +82,7 @@ public final class CefX509Certificate_N extends CefX509Certificate implements Ce
 	@Override
 	public void release() {
 		try {
-			System.out.println("CefX509Certificate_N released "+getNativeRef(null));
+		
 			N_Release(getNativeRef(null));
 		} catch (UnsatisfiedLinkError ule) {
 			ule.printStackTrace();
