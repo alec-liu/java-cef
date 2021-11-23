@@ -1,6 +1,10 @@
 package org.cef.security;
 
-import javax.security.cert.X509Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.cert.CertificateException;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 
 import org.cef.callback.CefDragData;
 import org.cef.callback.CefNative;
@@ -10,8 +14,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
-
-import javax.security.cert.CertificateException;
 
 public final class CefX509Certificate_N extends CefX509Certificate implements CefNative {
 
@@ -24,13 +26,12 @@ public final class CefX509Certificate_N extends CefX509Certificate implements Ce
 	@Override
 	public void addDEREncodedCertificateToTheChain(final byte[] buffer) {
 		try {
-			
-			X509Certificate subjectcertificate = X509Certificate.getInstance(buffer);
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            InputStream in = new ByteArrayInputStream(buffer);
+            X509Certificate subjectcertificate = (X509Certificate) certFactory.generateCertificate(in);
 			chainofcertificates.add(subjectcertificate);
-			
 		} catch (Exception e) {
 			e.printStackTrace();
-
 		}
 	}
 
@@ -40,7 +41,6 @@ public final class CefX509Certificate_N extends CefX509Certificate implements Ce
 			return chainofcertificates.get(0);
 		}
 		return null;
-
 	};
 
 	@Override
@@ -48,10 +48,8 @@ public final class CefX509Certificate_N extends CefX509Certificate implements Ce
 		if (chainofcertificates.size() > 1) {
 			return chainofcertificates.subList(1, chainofcertificates.size())
 					.toArray(new X509Certificate[chainofcertificates.size() - 1]);
-
 		}
 		return new X509Certificate[0];
-
 	};
 
 	@Override
@@ -69,7 +67,6 @@ public final class CefX509Certificate_N extends CefX509Certificate implements Ce
 			sb.append("-----------------------------" + "\n");
 			loopindex++;
 		}
-
 		return sb.toString();
 	}
 
@@ -82,7 +79,6 @@ public final class CefX509Certificate_N extends CefX509Certificate implements Ce
 	@Override
 	public void release() {
 		try {
-		
 			N_Release(getNativeRef(null));
 		} catch (UnsatisfiedLinkError ule) {
 			ule.printStackTrace();

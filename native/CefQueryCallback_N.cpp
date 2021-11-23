@@ -4,6 +4,7 @@
 
 #include "CefQueryCallback_N.h"
 #include "include/wrapper/cef_message_router.h"
+#include "jni_scoped_helpers.h"
 #include "jni_util.h"
 
 namespace {
@@ -16,7 +17,7 @@ CefRefPtr<CefQueryCallback> GetSelf(jlong self) {
 
 void ClearSelf(JNIEnv* env, jobject obj) {
   // Clear the reference added in ClientHandler::OnQuery.
-  SetCefForJNIObject<CefQueryCallback>(env, obj, NULL, "CefQueryCallback");
+  SetCefForJNIObject<CefQueryCallback>(env, obj, nullptr, "CefQueryCallback");
 }
 
 }  // namespace

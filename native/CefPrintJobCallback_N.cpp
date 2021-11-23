@@ -3,7 +3,7 @@
 // can be found in the LICENSE file.
 
 #include "CefPrintJobCallback_N.h"
-#include "jni_util.h"
+#include "jni_scoped_helpers.h"
 
 #include "include/cef_print_handler.h"
 
@@ -15,7 +15,7 @@ CefRefPtr<CefPrintJobCallback> GetSelf(jlong self) {
 
 void ClearSelf(JNIEnv* env, jobject obj) {
   // Clear the reference added in PrintJobHandler::OnPrintJob.
-  SetCefForJNIObject<CefPrintJobCallback>(env, obj, NULL,
+  SetCefForJNIObject<CefPrintJobCallback>(env, obj, nullptr,
                                           "CefPrintJobCallback");
 }
 

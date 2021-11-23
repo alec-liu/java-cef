@@ -4,7 +4,7 @@
 
 #include "CefCallback_N.h"
 #include "include/cef_callback.h"
-#include "jni_util.h"
+#include "jni_scoped_helpers.h"
 
 namespace {
 
@@ -14,7 +14,7 @@ CefRefPtr<CefCallback> GetSelf(jlong self) {
 
 void ClearSelf(JNIEnv* env, jobject obj) {
   // Clear the reference added in ResourceHandler.
-  SetCefForJNIObject<CefCallback>(env, obj, NULL, "CefCallback");
+  SetCefForJNIObject<CefCallback>(env, obj, nullptr, "CefCallback");
 }
 
 }  // namespace

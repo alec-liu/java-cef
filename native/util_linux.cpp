@@ -31,6 +31,11 @@ void X_XReparentWindow(unsigned long browserHandle,
   XReparentWindow(xdisplay, browserHandle, parentDrawable, 0, 0);
 }
 
+void X_XSync(bool discard) {
+  ::Display* xdisplay = (::Display*)TempWindow::GetDisplay();
+  XSync(xdisplay, discard);
+}
+
 }  // namespace
 
 // This function is called by LifeSpanHandler::OnAfterCreated().
@@ -52,12 +57,28 @@ CefWindowHandle GetWindowHandle(JNIEnv* env, jobject canvas) {
 
 void SetParent(CefWindowHandle browserHandle,
                CefWindowHandle parentHandle,
-               const base::Closure& callback) {
+               base::OnceClosure callback) {
+  SetParentSync(browserHandle, parentHandle, nullptr, std::move(callback));
+}
+
+void SetParentSync(CefWindowHandle browserHandle,
+                   CefWindowHandle parentHandle,
+                   CriticalWait* waitCond,
+                   base::OnceClosure callback) {
+  if (waitCond) {
+    waitCond->lock()->Lock();
+  }
   if (parentHandle == kNullWindowHandle)
     parentHandle = TempWindow::GetWindowHandle();
   if (parentHandle != kNullWindowHandle && browserHandle != kNullWindowHandle)
     X_XReparentWindow(browserHandle, parentHandle);
-  callback.Run();
+
+  if (waitCond) {
+    X_XSync(false);
+    waitCond->WakeUp();
+    waitCond->lock()->Unlock();
+  }
+  std::move(callback).Run();
 }
 
 void SetWindowBounds(CefWindowHandle browserHandle,

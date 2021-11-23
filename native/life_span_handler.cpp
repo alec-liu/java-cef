@@ -29,7 +29,7 @@ bool LifeSpanHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
     return true;
   }
 
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return false;
 
@@ -50,7 +50,7 @@ bool LifeSpanHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
 }
 
 void LifeSpanHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env || jbrowsers_.empty())
     return;
 
@@ -75,7 +75,7 @@ void LifeSpanHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 }
 
 bool LifeSpanHandler::DoClose(CefRefPtr<CefBrowser> browser) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return false;
 
@@ -90,7 +90,7 @@ bool LifeSpanHandler::DoClose(CefRefPtr<CefBrowser> browser) {
 
 void LifeSpanHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
   REQUIRE_UI_THREAD();
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return;
 
@@ -102,7 +102,7 @@ void LifeSpanHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
   // Clear the browser pointer member of the Java object. This will
   // release the browser reference that was added in
   // LifeSpanHandler::OnAfterCreated.
-  SetCefForJNIObject<CefBrowser>(env, jbrowser, NULL, "CefBrowser");
+  SetCefForJNIObject<CefBrowser>(env, jbrowser, nullptr, "CefBrowser");
 
   CefRefPtr<ClientHandler> client =
       (ClientHandler*)browser->GetHost()->GetClient().get();
@@ -111,7 +111,7 @@ void LifeSpanHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
 
 void LifeSpanHandler::OnAfterParentChanged(CefRefPtr<CefBrowser> browser) {
   REQUIRE_UI_THREAD();
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return;
 

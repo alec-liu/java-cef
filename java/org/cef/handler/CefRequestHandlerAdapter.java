@@ -7,7 +7,7 @@ package org.cef.handler;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.callback.CefAuthCallback;
-import org.cef.callback.CefRequestCallback;
+import org.cef.callback.CefCallback;
 import org.cef.callback.CefSelectClientCertificateCallback;
 import org.cef.security.CefX509Certificate;
 import org.cef.handler.CefLoadHandler.ErrorCode;
@@ -28,6 +28,12 @@ public abstract class CefRequestHandlerAdapter implements CefRequestHandler {
     }
 
     @Override
+    public boolean onOpenURLFromTab(CefBrowser browser, CefFrame frame, String target_url,
+            boolean user_gesture) {
+        return false;
+    }
+
+    @Override
     public CefResourceRequestHandler getResourceRequestHandler(CefBrowser browser, CefFrame frame,
             CefRequest request, boolean isNavigation, boolean isDownload, String requestInitiator,
             BoolRef disableDefaultHandling) {
@@ -42,13 +48,13 @@ public abstract class CefRequestHandlerAdapter implements CefRequestHandler {
 
     @Override
     public boolean onQuotaRequest(
-            CefBrowser browser, String origin_url, long new_size, CefRequestCallback callback) {
+            CefBrowser browser, String origin_url, long new_size, CefCallback callback) {
         return false;
     }
 
     @Override
     public boolean onCertificateError(CefBrowser browser, ErrorCode cert_error, String request_url,
-            CefRequestCallback callback) {
+            CefCallback callback) {
         return false;
     }
 
@@ -57,7 +63,7 @@ public abstract class CefRequestHandlerAdapter implements CefRequestHandler {
 
     @Override
     public void onRenderProcessTerminated(CefBrowser browser, TerminationStatus status) {}
-    
+
     @Override
     public boolean onSelectClientCertificate(CefBrowser browser,
     boolean isProxy,
@@ -66,8 +72,9 @@ public abstract class CefRequestHandlerAdapter implements CefRequestHandler {
     final CefX509Certificate[] certificates,
     CefSelectClientCertificateCallback callback)
     {
-        return false; //by defaut no callback
+        //by defaut no callback
+        return false;
     }
-    
-    
+
+
 }

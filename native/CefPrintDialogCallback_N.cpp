@@ -4,7 +4,7 @@
 
 #include "CefPrintDialogCallback_N.h"
 #include "include/cef_print_handler.h"
-#include "jni_util.h"
+#include "jni_scoped_helpers.h"
 
 namespace {
 
@@ -14,7 +14,7 @@ CefRefPtr<CefPrintDialogCallback> GetSelf(jlong self) {
 
 void ClearSelf(JNIEnv* env, jobject obj) {
   // Clear the reference added in PrintHandler::OnPrintDialog.
-  SetCefForJNIObject<CefPrintDialogCallback>(env, obj, NULL,
+  SetCefForJNIObject<CefPrintDialogCallback>(env, obj, nullptr,
                                              "CefPrintDialogCallback");
 }
 

@@ -12,16 +12,21 @@ extern "C" {
  * Method:    N_Select
  * Signature: (JLorg/cef/security/CefX509Certificate;)V
  */
-JNIEXPORT void JNICALL Java_org_cef_callback_CefSelectClientCertificateCallback_1N_N_1Select
-  (JNIEnv *, jobject, jlong, jobject);
+JNIEXPORT void JNICALL
+Java_org_cef_callback_CefSelectClientCertificateCallback_1N_N_1Select(JNIEnv*,
+                                                                      jobject,
+                                                                      jlong,
+                                                                      jobject);
 
 /*
  * Class:     org_cef_callback_CefSelectClientCertificateCallback_N
  * Method:    N_Cancel
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL Java_org_cef_callback_CefSelectClientCertificateCallback_1N_N_1Cancel
-  (JNIEnv *, jobject, jlong);
+JNIEXPORT void JNICALL
+Java_org_cef_callback_CefSelectClientCertificateCallback_1N_N_1Cancel(JNIEnv*,
+                                                                      jobject,
+                                                                      jlong);
 
 #ifdef __cplusplus
 }

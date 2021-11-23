@@ -14,7 +14,7 @@ import org.cef.CefClient;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.callback.CefAuthCallback;
-import org.cef.callback.CefRequestCallback;
+import org.cef.callback.CefCallback;
 import org.cef.handler.CefCookieAccessFilter;
 import org.cef.handler.CefLifeSpanHandler;
 import org.cef.handler.CefLoadHandler;
@@ -220,6 +220,12 @@ class TestFrame extends JFrame implements CefLifeSpanHandler, CefLoadHandler, Ce
     }
 
     @Override
+    public boolean onOpenURLFromTab(CefBrowser browser, CefFrame frame, String target_url,
+            boolean user_gesture) {
+        return false;
+    }
+
+    @Override
     public CefResourceRequestHandler getResourceRequestHandler(CefBrowser browser, CefFrame frame,
             CefRequest request, boolean isNavigation, boolean isDownload, String requestInitiator,
             BoolRef disableDefaultHandling) {
@@ -234,13 +240,13 @@ class TestFrame extends JFrame implements CefLifeSpanHandler, CefLoadHandler, Ce
 
     @Override
     public boolean onQuotaRequest(
-            CefBrowser browser, String origin_url, long new_size, CefRequestCallback callback) {
+            CefBrowser browser, String origin_url, long new_size, CefCallback callback) {
         return false;
     }
 
     @Override
     public boolean onCertificateError(CefBrowser browser, CefLoadHandler.ErrorCode cert_error,
-            String request_url, CefRequestCallback callback) {
+            String request_url, CefCallback callback) {
         return false;
     }
 
@@ -300,10 +306,9 @@ class TestFrame extends JFrame implements CefLifeSpanHandler, CefLoadHandler, Ce
     @Override
     public void onProtocolExecution(
             CefBrowser browser, CefFrame frame, CefRequest request, BoolRef allowOsExecution) {}
-                                              
+
     @Override
     public boolean onSelectClientCertificate(CefBrowser browser, boolean isProxy, String host, int port,CefX509Certificate[] certificates, CefSelectClientCertificateCallback callback) {
-                                                  // TODO Auto-generated method stub
-                                                  return false;
-                                              }
+        return false;
+    }
 }

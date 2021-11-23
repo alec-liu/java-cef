@@ -56,8 +56,8 @@ set(JCEF_SRCS
   CefQueryCallback_N.h
   CefRequest_N.cpp
   CefRequest_N.h
-  CefRequestCallback_N.cpp
-  CefRequestCallback_N.h
+  CefCallback_N.cpp
+  CefCallback_N.h
   CefRequestContext_N.cpp
   CefRequestContext_N.h
   CefResponse_N.cpp
@@ -159,7 +159,7 @@ set(JCEF_SRCS_LINUX
   util_linux.cpp
   util_posix.cpp
   )
-set(JCEF_SRCS_MACOSX
+set(JCEF_SRCS_MAC
   critical_wait_posix.cpp
   signal_restore_posix.cpp
   signal_restore_posix.h
@@ -188,7 +188,7 @@ set(JCEF_HELPER_SRCS
 set(JCEF_HELPER_SRCS_LINUX
   util_posix.cpp
   )
-set(JCEF_HELPER_SRCS_MACOSX
+set(JCEF_HELPER_SRCS_MAC
   util_posix.cpp
   )
 set(JCEF_HELPER_SRCS_WINDOWS
@@ -205,7 +205,7 @@ source_group(jcef FILES ${JCEF_HELPER_SRCS})
 
 # Target binary names.
 set(JCEF_TARGET "jcef")
-if(OS_MACOSX)
+if(OS_MAC)
   set(JCEF_APP_NAME "jcef_app")
   set(JCEF_HELPER_TARGET "jcef_Helper")
   set(JCEF_HELPER_OUTPUT_NAME "jcef Helper")
@@ -289,7 +289,7 @@ endif()
 # Mac OS X configuration.
 #
 
-if(OS_MACOSX)
+if(OS_MAC)
   # Avoid CMP0042 policy errors.
   set(CMAKE_MACOSX_RPATH 1)
 

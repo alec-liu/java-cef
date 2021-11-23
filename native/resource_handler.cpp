@@ -7,26 +7,12 @@
 #include "jni_util.h"
 #include "util.h"
 
-namespace {
-
-// JNI CefCallback object.
-class ScopedJNICallback : public ScopedJNIObject<CefCallback> {
- public:
-  ScopedJNICallback(JNIEnv* env, CefRefPtr<CefCallback> obj)
-      : ScopedJNIObject<CefCallback>(env,
-                                     obj,
-                                     "org/cef/callback/CefCallback_N",
-                                     "CefCallback") {}
-};
-
-}  // namespace
-
 ResourceHandler::ResourceHandler(JNIEnv* env, jobject handler)
     : handle_(env, handler) {}
 
 bool ResourceHandler::ProcessRequest(CefRefPtr<CefRequest> request,
                                      CefRefPtr<CefCallback> callback) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return false;
 
@@ -52,7 +38,7 @@ bool ResourceHandler::ProcessRequest(CefRefPtr<CefRequest> request,
 void ResourceHandler::GetResponseHeaders(CefRefPtr<CefResponse> response,
                                          int64& response_length,
                                          CefString& redirectUrl) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return;
 
@@ -75,7 +61,7 @@ bool ResourceHandler::ReadResponse(void* data_out,
                                    int bytes_to_read,
                                    int& bytes_read,
                                    CefRefPtr<CefCallback> callback) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return false;
 
@@ -97,7 +83,7 @@ bool ResourceHandler::ReadResponse(void* data_out,
     jcallback.SetTemporary();
   }
 
-  jbyte* jbyte = env->GetByteArrayElements(jbytes, NULL);
+  jbyte* jbyte = env->GetByteArrayElements(jbytes, nullptr);
   if (jbyte) {
     memmove(data_out, jbyte,
             (bytes_read < bytes_to_read ? bytes_read : bytes_to_read));
@@ -109,7 +95,7 @@ bool ResourceHandler::ReadResponse(void* data_out,
 }
 
 void ResourceHandler::Cancel() {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return;
   JNI_CALL_VOID_METHOD(env, handle_, "cancel", "()V");

@@ -4,7 +4,7 @@
 
 #include "CefDownloadItemCallback_N.h"
 #include "include/cef_download_handler.h"
-#include "jni_util.h"
+#include "jni_scoped_helpers.h"
 
 namespace {
 
@@ -14,7 +14,7 @@ CefRefPtr<CefDownloadItemCallback> GetSelf(jlong self) {
 
 void ClearSelf(JNIEnv* env, jobject obj) {
   // Clear the reference added in DownloadHandler::OnDownloadUpdated.
-  SetCefForJNIObject<CefDownloadItemCallback>(env, obj, NULL,
+  SetCefForJNIObject<CefDownloadItemCallback>(env, obj, nullptr,
                                               "CefDownloadItemCallback");
 }
 

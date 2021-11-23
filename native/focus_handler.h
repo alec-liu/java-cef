@@ -7,22 +7,24 @@
 #pragma once
 
 #include <jni.h>
+
 #include "include/cef_focus_handler.h"
+
+#include "jni_scoped_helpers.h"
 
 // FocusHandler implementation.
 class FocusHandler : public CefFocusHandler {
  public:
   FocusHandler(JNIEnv* env, jobject handler);
-  virtual ~FocusHandler();
 
   // CefFocusHandler methods
-  virtual void OnTakeFocus(CefRefPtr<CefBrowser> browser, bool next) OVERRIDE;
+  virtual void OnTakeFocus(CefRefPtr<CefBrowser> browser, bool next) override;
   virtual bool OnSetFocus(CefRefPtr<CefBrowser> browser,
-                          FocusSource source) OVERRIDE;
-  virtual void OnGotFocus(CefRefPtr<CefBrowser> browser) OVERRIDE;
+                          FocusSource source) override;
+  virtual void OnGotFocus(CefRefPtr<CefBrowser> browser) override;
 
  protected:
-  jobject jhandler_;
+  ScopedJNIObjectGlobal handle_;
 
   // Include the default reference counting implementation.
   IMPLEMENT_REFCOUNTING(FocusHandler);

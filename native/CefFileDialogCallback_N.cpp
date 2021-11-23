@@ -4,6 +4,7 @@
 
 #include "CefFileDialogCallback_N.h"
 #include "include/cef_dialog_handler.h"
+#include "jni_scoped_helpers.h"
 #include "jni_util.h"
 
 namespace {
@@ -14,7 +15,7 @@ CefRefPtr<CefFileDialogCallback> GetSelf(jlong self) {
 
 void ClearSelf(JNIEnv* env, jobject obj) {
   // Clear the reference added in DialogHandler::OnFileDialog.
-  SetCefForJNIObject<CefFileDialogCallback>(env, obj, NULL,
+  SetCefForJNIObject<CefFileDialogCallback>(env, obj, nullptr,
                                             "CefFileDialogCallback");
 }
 

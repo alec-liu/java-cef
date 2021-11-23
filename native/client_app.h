@@ -16,18 +16,17 @@
 // ClientApp implementation.
 class ClientApp : public CefApp {
  public:
-  ClientApp(const std::string& module_dir,
-            const std::string& cache_path,
+  ClientApp(const std::string& cache_path,
             JNIEnv* env,
             const jobject app_handler);
 
   // CefApp methods:
   void OnBeforeCommandLineProcessing(
       const CefString& process_type,
-      CefRefPtr<CefCommandLine> command_line) OVERRIDE;
+      CefRefPtr<CefCommandLine> command_line) override;
   void OnRegisterCustomSchemes(
-      CefRawPtr<CefSchemeRegistrar> registrar) OVERRIDE;
-  CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() OVERRIDE;
+      CefRawPtr<CefSchemeRegistrar> registrar) override;
+  CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() override;
 
 #if defined(OS_MACOSX)
   // Used to continue termination handling in Java.
@@ -39,7 +38,6 @@ class ClientApp : public CefApp {
   static void eraseTempFiles();
 
  protected:
-  const std::string module_dir_;
   const std::string cache_path_;
   ScopedJNIObjectGlobal handle_;
   CefRefPtr<BrowserProcessHandler> process_handler_;

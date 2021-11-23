@@ -14,9 +14,8 @@ public interface CefSelectClientCertificateCallback {
     /**
      * Continue the authentication request.
      */
-    public void Select(CefX509Certificate selectedcertif);
-    
+    public void select(CefX509Certificate selectedcertif);
+
     public void cancel();
 
-    
 }

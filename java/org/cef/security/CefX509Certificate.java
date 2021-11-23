@@ -1,16 +1,6 @@
 package org.cef.security;
 
-import javax.security.cert.X509Certificate;
-
-import org.cef.callback.CefNativeAdapter;
-
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Vector;
-
-import javax.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 public abstract class CefX509Certificate {
 
@@ -20,12 +10,8 @@ public abstract class CefX509Certificate {
 
 	public abstract X509Certificate[] getIssuerCertificates() ;
 
-	
 	public abstract void release();
 
-
 	public abstract String toString() ;
-	
-	
 
 }

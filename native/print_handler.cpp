@@ -39,7 +39,7 @@ PrintHandler::PrintHandler(JNIEnv* env, jobject handler)
     : handle_(env, handler) {}
 
 void PrintHandler::OnPrintStart(CefRefPtr<CefBrowser> browser) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return;
 
@@ -52,7 +52,7 @@ void PrintHandler::OnPrintStart(CefRefPtr<CefBrowser> browser) {
 void PrintHandler::OnPrintSettings(CefRefPtr<CefBrowser> browser,
                                    CefRefPtr<CefPrintSettings> settings,
                                    bool get_defaults) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return;
 
@@ -69,7 +69,7 @@ void PrintHandler::OnPrintSettings(CefRefPtr<CefBrowser> browser,
 bool PrintHandler::OnPrintDialog(CefRefPtr<CefBrowser> browser,
                                  bool has_selection,
                                  CefRefPtr<CefPrintDialogCallback> callback) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return false;
 
@@ -97,7 +97,7 @@ bool PrintHandler::OnPrintJob(CefRefPtr<CefBrowser> browser,
                               const CefString& document_name,
                               const CefString& pdf_file_path,
                               CefRefPtr<CefPrintJobCallback> callback) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return false;
 
@@ -125,7 +125,7 @@ bool PrintHandler::OnPrintJob(CefRefPtr<CefBrowser> browser,
 }
 
 void PrintHandler::OnPrintReset(CefRefPtr<CefBrowser> browser) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return;
 
@@ -135,15 +135,18 @@ void PrintHandler::OnPrintReset(CefRefPtr<CefBrowser> browser) {
                        "(Lorg/cef/browser/CefBrowser;)V", jbrowser.get());
 }
 
-CefSize PrintHandler::GetPdfPaperSize(int device_units_per_inch) {
-  JNIEnv* env = GetJNIEnv();
+CefSize PrintHandler::GetPdfPaperSize(CefRefPtr<CefBrowser> browser,
+                                      int device_units_per_inch) {
+  ScopedJNIEnv env;
   if (!env)
     return CefSize(0, 0);
 
+  ScopedJNIBrowser jbrowser(env, browser);
   ScopedJNIObjectResult jresult(env);
 
-  JNI_CALL_METHOD(env, handle_, "getPdfPaperSize", "(I)Ljava/awt/Dimension;",
-                  Object, jresult, (jint)device_units_per_inch);
+  JNI_CALL_METHOD(env, handle_, "getPdfPaperSize",
+                  "(Lorg/cef/browser/CefBrowser;I)Ljava/awt/Dimension;", Object,
+                  jresult, jbrowser.get(), (jint)device_units_per_inch);
   if (!jresult)
     return CefSize(0, 0);
 

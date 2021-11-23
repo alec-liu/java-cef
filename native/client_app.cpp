@@ -18,12 +18,10 @@ std::set<std::string>& GetTempFilesSet() {
 
 }  // namespace
 
-ClientApp::ClientApp(const std::string& module_dir,
-                     const std::string& cache_path,
+ClientApp::ClientApp(const std::string& cache_path,
                      JNIEnv* env,
                      const jobject app_handler)
-    : module_dir_(module_dir),
-      cache_path_(cache_path),
+    : cache_path_(cache_path),
       handle_(env, app_handler),
       process_handler_(new BrowserProcessHandler(env, app_handler)) {}
 
@@ -34,7 +32,9 @@ void ClientApp::OnBeforeCommandLineProcessing(
   // the commandline processing to it before we append the essential
   // switches "locale_pak" and "use-core-animation".
   if (handle_ && process_type.empty()) {
-    BEGIN_ENV(env)
+    ScopedJNIEnv env;
+    if (!env)
+      return;
 
     ScopedJNIString jprocessType(env, process_type);
     ScopedJNIObject<CefCommandLine> jcommandLine(
@@ -46,20 +46,10 @@ void ClientApp::OnBeforeCommandLineProcessing(
         env, handle_, "onBeforeCommandLineProcessing",
         "(Ljava/lang/String;Lorg/cef/callback/CefCommandLine;)V",
         jprocessType.get(), jcommandLine.get());
-
-    END_ENV(env)
   }
 
   if (process_type.empty()) {
 #if defined(OS_MACOSX)
-    // Specify a path for the locale.pak file because CEF will fail to locate
-    // it based on the app bundle structure.
-    const std::string& locale_path = util_mac::GetAbsPath(
-        module_dir_ +
-        "/../Frameworks/Chromium Embedded Framework.framework/"
-        "Resources/en.lproj/locale.pak");
-    command_line->AppendSwitchWithValue("locale_pak", locale_path);
-
     // If windowed rendering is used, we need the browser window as CALayer
     // due Java7 is CALayer based instead of NSLayer based.
     command_line->AppendSwitch("use-core-animation");
@@ -81,7 +71,9 @@ void ClientApp::OnRegisterCustomSchemes(
   if (!handle_)
     return;
 
-  BEGIN_ENV(env)
+  ScopedJNIEnv env;
+  if (!env)
+    return;
 
   ScopedJNIObject<CefSchemeRegistrar, CefRawPtr<CefSchemeRegistrar>> jregistrar(
       env, registrar, "org/cef/callback/CefSchemeRegistrar_N",
@@ -91,8 +83,6 @@ void ClientApp::OnRegisterCustomSchemes(
   JNI_CALL_VOID_METHOD(env, handle_, "onRegisterCustomSchemes",
                        "(Lorg/cef/callback/CefSchemeRegistrar;)V",
                        jregistrar.get());
-
-  END_ENV(env)
 }
 
 CefRefPtr<CefBrowserProcessHandler> ClientApp::GetBrowserProcessHandler() {
@@ -101,25 +91,28 @@ CefRefPtr<CefBrowserProcessHandler> ClientApp::GetBrowserProcessHandler() {
 
 #if defined(OS_MACOSX)
 bool ClientApp::HandleTerminate() {
-  BEGIN_ENV(env)
-  jclass cls = FindClass(env, "org/cef/CefApp");
-  if (!cls) {
+  ScopedJNIEnv env;
+  if (!env)
+    return false;
+
+  ScopedJNIClass jcls(env, "org/cef/CefApp");
+  if (!jcls) {
     return false;
   }
 
   jmethodID methodId =
-      env->GetStaticMethodID(cls, "getInstance", "()Lorg/cef/CefApp;");
+      env->GetStaticMethodID(jcls, "getInstance", "()Lorg/cef/CefApp;");
   if (!methodId) {
     return false;
   }
 
-  jobject jcefApp = env->CallStaticObjectMethod(cls, methodId);
+  ScopedJNIObjectLocal jcefApp(env,
+                               env->CallStaticObjectMethod(jcls, methodId));
   if (!jcefApp) {
     return false;
   }
 
   JNI_CALL_VOID_METHOD(env, jcefApp, "handleBeforeTerminate", "()V");
-  END_ENV(env)
   return true;
 }
 #endif  // defined(OS_MACOSX)

@@ -4,6 +4,7 @@
 
 #include "CefDownloadItem_N.h"
 #include "include/cef_download_item.h"
+#include "jni_scoped_helpers.h"
 #include "jni_util.h"
 
 namespace {
@@ -100,9 +101,9 @@ Java_org_cef_callback_CefDownloadItem_1N_N_1GetStartTime(JNIEnv* env,
                                                          jlong self) {
   CefRefPtr<CefDownloadItem> downloadItem = GetSelf(self);
   if (!downloadItem)
-    return NULL;
-  CefTime start = downloadItem->GetStartTime();
-  return NewJNIDate(env, start);
+    return nullptr;
+  ScopedJNIDate jdate(env, downloadItem->GetStartTime());
+  return jdate.Release();
 }
 
 JNIEXPORT jobject JNICALL
@@ -111,9 +112,9 @@ Java_org_cef_callback_CefDownloadItem_1N_N_1GetEndTime(JNIEnv* env,
                                                        jlong self) {
   CefRefPtr<CefDownloadItem> downloadItem = GetSelf(self);
   if (!downloadItem)
-    return NULL;
-  CefTime end = downloadItem->GetEndTime();
-  return NewJNIDate(env, end);
+    return nullptr;
+  ScopedJNIDate jdate(env, downloadItem->GetEndTime());
+  return jdate.Release();
 }
 
 JNIEXPORT jstring JNICALL
@@ -122,7 +123,7 @@ Java_org_cef_callback_CefDownloadItem_1N_N_1GetFullPath(JNIEnv* env,
                                                         jlong self) {
   CefRefPtr<CefDownloadItem> downloadItem = GetSelf(self);
   if (!downloadItem)
-    return NULL;
+    return nullptr;
   return NewJNIString(env, downloadItem->GetFullPath());
 }
 
@@ -142,7 +143,7 @@ Java_org_cef_callback_CefDownloadItem_1N_N_1GetURL(JNIEnv* env,
                                                    jlong self) {
   CefRefPtr<CefDownloadItem> downloadItem = GetSelf(self);
   if (!downloadItem)
-    return NULL;
+    return nullptr;
   return NewJNIString(env, downloadItem->GetURL());
 }
 
@@ -152,7 +153,7 @@ Java_org_cef_callback_CefDownloadItem_1N_N_1GetSuggestedFileName(JNIEnv* env,
                                                                  jlong self) {
   CefRefPtr<CefDownloadItem> downloadItem = GetSelf(self);
   if (!downloadItem)
-    return NULL;
+    return nullptr;
   return NewJNIString(env, downloadItem->GetSuggestedFileName());
 }
 
@@ -162,7 +163,7 @@ Java_org_cef_callback_CefDownloadItem_1N_N_1GetContentDisposition(JNIEnv* env,
                                                                   jlong self) {
   CefRefPtr<CefDownloadItem> downloadItem = GetSelf(self);
   if (!downloadItem)
-    return NULL;
+    return nullptr;
   return NewJNIString(env, downloadItem->GetContentDisposition());
 }
 
@@ -172,6 +173,6 @@ Java_org_cef_callback_CefDownloadItem_1N_N_1GetMimeType(JNIEnv* env,
                                                         jlong self) {
   CefRefPtr<CefDownloadItem> downloadItem = GetSelf(self);
   if (!downloadItem)
-    return NULL;
+    return nullptr;
   return NewJNIString(env, downloadItem->GetMimeType());
 }

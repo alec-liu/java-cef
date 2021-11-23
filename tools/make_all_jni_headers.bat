@@ -3,7 +3,7 @@
 :: reserved. Use of this source code is governed by a BSD-style license
 :: that can be found in the LICENSE file.
 
-set RC=
+set RETURNCODE=
 setlocal
 
 if "%1" == "" (
@@ -34,7 +34,6 @@ call make_jni_header.bat %1 org.cef.callback.CefMenuModel_N
 call make_jni_header.bat %1 org.cef.callback.CefPrintDialogCallback_N
 call make_jni_header.bat %1 org.cef.callback.CefPrintJobCallback_N
 call make_jni_header.bat %1 org.cef.callback.CefQueryCallback_N
-call make_jni_header.bat %1 org.cef.callback.CefRequestCallback_N
 call make_jni_header.bat %1 org.cef.callback.CefSchemeRegistrar_N
 call make_jni_header.bat %1 org.cef.handler.CefClientHandler
 call make_jni_header.bat %1 org.cef.misc.CefPrintSettings_N
@@ -49,11 +48,11 @@ call make_jni_header.bat %1 org.cef.network.CefWebPluginManager_N
 call make_jni_header.bat %1 org.cef.callback.CefSelectClientCertificateCallback_N
 
 :end
-endlocal & set RC=%ERRORLEVEL%
+endlocal & set RETURNCODE=%ERRORLEVEL%
 goto omega
 
 :returncode
-exit /B %RC%
+exit /B %RETURNCODE%
 
 :omega
-call :returncode %RC%
+call :returncode %RETURNCODE%

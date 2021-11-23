@@ -4,6 +4,7 @@
 
 #include "CefJSDialogCallback_N.h"
 #include "include/cef_jsdialog_handler.h"
+#include "jni_scoped_helpers.h"
 #include "jni_util.h"
 
 namespace {
@@ -15,7 +16,7 @@ CefRefPtr<CefJSDialogCallback> GetSelf(jlong self) {
 void ClearSelf(JNIEnv* env, jobject obj) {
   // Clear the reference added in JSDialogHandler::OnJSDialog and
   // JSDialogHandler::OnBeforeUnloadDialog.
-  SetCefForJNIObject<CefJSDialogCallback>(env, obj, NULL,
+  SetCefForJNIObject<CefJSDialogCallback>(env, obj, nullptr,
                                           "CefJSDialogCallback");
 }
 

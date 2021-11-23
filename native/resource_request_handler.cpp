@@ -16,9 +16,9 @@ CefRefPtr<CefCookieAccessFilter> ResourceRequestHandler::GetCookieAccessFilter(
     CefRefPtr<CefBrowser> browser,
     CefRefPtr<CefFrame> frame,
     CefRefPtr<CefRequest> request) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
-    return NULL;
+    return nullptr;
 
   ScopedJNIBrowser jbrowser(env, browser);
   ScopedJNIFrame jframe(env, frame);
@@ -36,17 +36,16 @@ CefRefPtr<CefCookieAccessFilter> ResourceRequestHandler::GetCookieAccessFilter(
 
   if (jresult)
     return new CookieAccessFilter(env, jresult);
-  return NULL;
+  return nullptr;
 }
 
 // TODO(JCEF): Expose the |callback| parameter.
 ResourceRequestHandler::ReturnValue
-ResourceRequestHandler::OnBeforeResourceLoad(
-    CefRefPtr<CefBrowser> browser,
-    CefRefPtr<CefFrame> frame,
-    CefRefPtr<CefRequest> request,
-    CefRefPtr<CefRequestCallback> callback) {
-  JNIEnv* env = GetJNIEnv();
+ResourceRequestHandler::OnBeforeResourceLoad(CefRefPtr<CefBrowser> browser,
+                                             CefRefPtr<CefFrame> frame,
+                                             CefRefPtr<CefRequest> request,
+                                             CefRefPtr<CefCallback> callback) {
+  ScopedJNIEnv env;
   if (!env)
     return RV_CONTINUE;
 
@@ -70,9 +69,9 @@ CefRefPtr<CefResourceHandler> ResourceRequestHandler::GetResourceHandler(
     CefRefPtr<CefBrowser> browser,
     CefRefPtr<CefFrame> frame,
     CefRefPtr<CefRequest> request) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
-    return NULL;
+    return nullptr;
 
   ScopedJNIBrowser jbrowser(env, browser);
   ScopedJNIFrame jframe(env, frame);
@@ -90,7 +89,7 @@ CefRefPtr<CefResourceHandler> ResourceRequestHandler::GetResourceHandler(
 
   if (jresult)
     return new ResourceHandler(env, jresult);
-  return NULL;
+  return nullptr;
 }
 
 void ResourceRequestHandler::OnResourceRedirect(CefRefPtr<CefBrowser> browser,
@@ -98,7 +97,7 @@ void ResourceRequestHandler::OnResourceRedirect(CefRefPtr<CefBrowser> browser,
                                                 CefRefPtr<CefRequest> request,
                                                 CefRefPtr<CefResponse> response,
                                                 CefString& new_url) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return;
 
@@ -127,7 +126,7 @@ bool ResourceRequestHandler::OnResourceResponse(
     CefRefPtr<CefFrame> frame,
     CefRefPtr<CefRequest> request,
     CefRefPtr<CefResponse> response) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return false;
 
@@ -156,7 +155,7 @@ void ResourceRequestHandler::OnResourceLoadComplete(
     CefRefPtr<CefResponse> response,
     CefResourceRequestHandler::URLRequestStatus status,
     int64 received_content_length) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return;
 
@@ -167,7 +166,7 @@ void ResourceRequestHandler::OnResourceLoadComplete(
   jrequest.SetTemporary();
   ScopedJNIResponse jresponse(env, response);
   jresponse.SetTemporary();
-  ScopedJNIObjectLocal jstatus(env, NewJNIURLRequestStatus(env, status));
+  ScopedJNIURLRequestStatus jstatus(env, status);
 
   JNI_CALL_VOID_METHOD(
       env, handle_, "onResourceLoadComplete",
@@ -182,7 +181,7 @@ void ResourceRequestHandler::OnProtocolExecution(CefRefPtr<CefBrowser> browser,
                                                  CefRefPtr<CefFrame> frame,
                                                  CefRefPtr<CefRequest> request,
                                                  bool& allow_os_execution) {
-  JNIEnv* env = GetJNIEnv();
+  ScopedJNIEnv env;
   if (!env)
     return;
 

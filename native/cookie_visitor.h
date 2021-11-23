@@ -7,22 +7,24 @@
 #pragma once
 
 #include <jni.h>
+
 #include "include/cef_cookie.h"
+
+#include "jni_scoped_helpers.h"
 
 // CookieVisitor implementation.
 class CookieVisitor : public CefCookieVisitor {
  public:
   CookieVisitor(JNIEnv* env, jobject jvisitor);
-  virtual ~CookieVisitor();
 
   // CookieVisitor methods
   virtual bool Visit(const CefCookie& cookie,
                      int count,
                      int total,
-                     bool& deleteCookie) OVERRIDE;
+                     bool& deleteCookie) override;
 
  protected:
-  jobject jvisitor_;
+  ScopedJNIObjectGlobal handle_;
 
   // Include the default reference counting implementation.
   IMPLEMENT_REFCOUNTING(CookieVisitor);

@@ -4,6 +4,7 @@
 
 #include "CefAuthCallback_N.h"
 #include "include/cef_request_handler.h"
+#include "jni_scoped_helpers.h"
 #include "jni_util.h"
 
 namespace {
@@ -14,7 +15,7 @@ CefRefPtr<CefAuthCallback> GetSelf(jlong self) {
 
 void ClearSelf(JNIEnv* env, jobject obj) {
   // Clear the reference added in RequestHandler::GetAuthCredentials.
-  SetCefForJNIObject<CefAuthCallback>(env, obj, NULL, "CefAuthCallback");
+  SetCefForJNIObject<CefAuthCallback>(env, obj, nullptr, "CefAuthCallback");
 }
 
 }  // namespace

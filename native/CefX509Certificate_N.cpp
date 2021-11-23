@@ -1,6 +1,6 @@
 #include "CefX509Certificate_N.h"
 
-#include "jni_util.h"
+#include "jni_scoped_helpers.h"
 
 
 namespace {
@@ -11,7 +11,7 @@ CefRefPtr<CefX509Certificate> GetSelf(jlong self) {
 
 void ClearSelf(JNIEnv* env, jobject obj) {
 
-  SetCefForJNIObject<CefX509Certificate>(env, obj, NULL, "CefX509Certificate");
+  SetCefForJNIObject<CefX509Certificate>(env, obj, nullptr, "CefX509Certificate");
 }
 
 }  // namespac

@@ -4,11 +4,12 @@
 
 #include "CefBrowser_N.h"
 
-#include "include/base/cef_bind.h"
+#include "include/base/cef_callback.h"
 #include "include/cef_browser.h"
 #include "include/cef_task.h"
 #include "include/wrapper/cef_closure_task.h"
 
+#include "browser_process_handler.h"
 #include "client_handler.h"
 #include "critical_wait.h"
 #include "jni_util.h"
@@ -24,6 +25,7 @@
 #define XK_3270  // for XK_3270_BackTab
 #include <X11/XF86keysym.h>
 #include <X11/keysym.h>
+#include <memory>
 #endif
 
 #if defined(OS_MACOSX)
@@ -32,6 +34,7 @@
 #endif
 
 #if defined(OS_WIN)
+#include <memory>
 #undef MOUSE_MOVED
 #endif
 
@@ -887,26 +890,49 @@ int GetMacKeyCodeFromChar(int key_char) {
 }
 #endif  // defined(OS_MACOSX)
 
-jboolean create(JNIEnv* env,
-                jobject jbrowser,
-                jobject jparentBrowser,
-                jobject jclientHandler,
-                jlong windowHandle,
-                jstring url,
-                jboolean osr,
-                jboolean transparent,
-                jobject canvas,
-                jobject jcontext,
-                jobject jinspectAt) {
+struct JNIObjectsForCreate {
+ public:
+  ScopedJNIObjectGlobal jbrowser;
+  ScopedJNIObjectGlobal jparentBrowser;
+  ScopedJNIObjectGlobal jclientHandler;
+  ScopedJNIObjectGlobal url;
+  ScopedJNIObjectGlobal canvas;
+  ScopedJNIObjectGlobal jcontext;
+  ScopedJNIObjectGlobal jinspectAt;
+
+  JNIObjectsForCreate(JNIEnv* env,
+                      jobject _jbrowser,
+                      jobject _jparentBrowser,
+                      jobject _jclientHandler,
+                      jstring _url,
+                      jobject _canvas,
+                      jobject _jcontext,
+                      jobject _jinspectAt)
+      :
+
+        jbrowser(env, _jbrowser),
+        jparentBrowser(env, _jparentBrowser),
+        jclientHandler(env, _jclientHandler),
+        url(env, _url),
+        canvas(env, _canvas),
+        jcontext(env, _jcontext),
+        jinspectAt(env, _jinspectAt) {}
+};
+
+void create(std::shared_ptr<JNIObjectsForCreate> objs,
+            jlong windowHandle,
+            jboolean osr,
+            jboolean transparent) {
+  ScopedJNIEnv env;
   CefRefPtr<ClientHandler> clientHandler = GetCefFromJNIObject<ClientHandler>(
-      env, jclientHandler, "CefClientHandler");
+      env, objs->jclientHandler, "CefClientHandler");
   if (!clientHandler.get())
-    return JNI_FALSE;
+    return;
 
   CefRefPtr<LifeSpanHandler> lifeSpanHandler =
       (LifeSpanHandler*)clientHandler->GetLifeSpanHandler().get();
   if (!lifeSpanHandler.get())
-    return JNI_FALSE;
+    return;
 
   CefWindowInfo windowInfo;
   if (osr == JNI_FALSE) {
@@ -914,18 +940,17 @@ jboolean create(JNIEnv* env,
     CefRefPtr<WindowHandler> windowHandler =
         (WindowHandler*)clientHandler->GetWindowHandler().get();
     if (windowHandler.get()) {
-      windowHandler->GetRect(jbrowser, rect);
+      windowHandler->GetRect(objs->jbrowser, rect);
     }
 #if defined(OS_WIN)
     CefWindowHandle parent = TempWindow::GetWindowHandle();
-    if (canvas != NULL) {
-      parent = GetHwndOfCanvas(canvas, env);
+    if (objs->canvas != nullptr) {
+      parent = GetHwndOfCanvas(objs->canvas, env);
     } else {
       // Do not activate hidden browser windows on creation.
       windowInfo.ex_style |= WS_EX_NOACTIVATE;
     }
-    RECT winRect = {0, 0, rect.width, rect.height};
-    windowInfo.SetAsChild(parent, winRect);
+    windowInfo.SetAsChild(parent, rect);
 #elif defined(OS_MACOSX)
     NSWindow* parent = nullptr;
     if (windowHandle != 0) {
@@ -935,12 +960,11 @@ jboolean create(JNIEnv* env,
     }
     CefWindowHandle browserContentView =
         util_mac::CreateBrowserContentView(parent, rect);
-    windowInfo.SetAsChild(browserContentView, rect.x, rect.y, rect.width,
-                          rect.height);
+    windowInfo.SetAsChild(browserContentView, rect);
 #elif defined(OS_LINUX)
     CefWindowHandle parent = TempWindow::GetWindowHandle();
-    if (canvas != NULL) {
-      parent = GetDrawableOfCanvas(canvas, env);
+    if (objs->canvas != nullptr) {
+      parent = GetDrawableOfCanvas(objs->canvas, env);
     }
     windowInfo.SetAsChild(parent, rect);
 #endif
@@ -956,39 +980,48 @@ jboolean create(JNIEnv* env,
   }
 
   CefRefPtr<CefBrowser> browserObj;
-  CefString strUrl = GetJNIString(env, url);
+  CefString strUrl = GetJNIString(env, static_cast<jstring>(objs->url.get()));
 
   CefRefPtr<CefRequestContext> context = GetCefFromJNIObject<CefRequestContext>(
-      env, jcontext, "CefRequestContext");
+      env, objs->jcontext, "CefRequestContext");
 
   CefRefPtr<CefBrowser> parentBrowser =
-      GetCefFromJNIObject<CefBrowser>(env, jparentBrowser, "CefBrowser");
+      GetCefFromJNIObject<CefBrowser>(env, objs->jparentBrowser, "CefBrowser");
 
   // Add a global ref that will be released in LifeSpanHandler::OnAfterCreated.
-  jobject globalRef = env->NewGlobalRef(jbrowser);
+  jobject globalRef = env->NewGlobalRef(objs->jbrowser);
   lifeSpanHandler->registerJBrowser(globalRef);
 
   // If parentBrowser is set, we want to show the DEV-Tools for that browser
-  if (parentBrowser.get() != NULL) {
+  if (parentBrowser.get() != nullptr) {
     CefPoint inspectAt;
-    if (jinspectAt != NULL) {
+    if (objs->jinspectAt != nullptr) {
       int x, y;
-      GetJNIPoint(env, jinspectAt, &x, &y);
+      GetJNIPoint(env, objs->jinspectAt, &x, &y);
       inspectAt.Set(x, y);
     }
     parentBrowser->GetHost()->ShowDevTools(windowInfo, clientHandler.get(),
                                            settings, inspectAt);
-    return JNI_TRUE;
+    JNI_CALL_VOID_METHOD(env, objs->jbrowser, "notifyBrowserCreated", "()V");
+    return;
   }
 
-  bool result = CefBrowserHost::CreateBrowser(windowInfo, clientHandler.get(),
-                                              strUrl, settings, NULL, context);
+  CefRefPtr<CefDictionaryValue> extra_info;
+  auto router_configs = BrowserProcessHandler::GetMessageRouterConfigs();
+  if (router_configs) {
+    // Send the message router config to CefHelperApp::OnBrowserCreated.
+    extra_info = CefDictionaryValue::Create();
+    extra_info->SetList("router_configs", router_configs);
+  }
+
+  bool result = CefBrowserHost::CreateBrowser(
+      windowInfo, clientHandler.get(), strUrl, settings, extra_info, context);
   if (!result) {
     lifeSpanHandler->unregisterJBrowser(globalRef);
     env->DeleteGlobalRef(globalRef);
-    return JNI_FALSE;
+    return;
   }
-  return JNI_TRUE;
+  JNI_CALL_VOID_METHOD(env, objs->jbrowser, "notifyBrowserCreated", "()V");
 }
 
 void getZoomLevel(CefRefPtr<CefBrowserHost> host,
@@ -1004,7 +1037,7 @@ void getZoomLevel(CefRefPtr<CefBrowserHost> host,
 
 void OnAfterParentChanged(CefRefPtr<CefBrowser> browser) {
   if (!CefCurrentlyOn(TID_UI)) {
-    CefPostTask(TID_UI, base::Bind(&OnAfterParentChanged, browser));
+    CefPostTask(TID_UI, base::BindOnce(&OnAfterParentChanged, browser));
     return;
   }
 
@@ -1020,6 +1053,90 @@ void OnAfterParentChanged(CefRefPtr<CefBrowser> browser) {
   }
 }
 
+jobject NewJNILongVector(JNIEnv* env, const std::vector<int64>& vals) {
+  ScopedJNIObjectLocal jvector(env, "java/util/Vector");
+  if (!jvector)
+    return nullptr;
+
+  std::vector<int64>::const_iterator iter;
+  for (iter = vals.begin(); iter != vals.end(); ++iter) {
+    ScopedJNIObjectLocal argument(
+        env, NewJNIObject(env, "java/lang/Long", "(J)V", (jlong)*iter));
+    JNI_CALL_VOID_METHOD(env, jvector, "addElement", "(Ljava/lang/Object;)V",
+                         argument.get());
+  }
+  return jvector.Release();
+}
+
+CefPdfPrintSettings GetJNIPdfPrintSettings(JNIEnv* env, jobject obj) {
+  CefString tmp;
+  CefPdfPrintSettings settings;
+  if (!obj)
+    return settings;
+
+  ScopedJNIClass cls(env, "org/cef/misc/CefPdfPrintSettings");
+  if (!cls)
+    return settings;
+
+  GetJNIFieldBoolean(env, cls, obj, "header_footer_enabled",
+                     &settings.header_footer_enabled);
+
+  if (GetJNIFieldString(env, cls, obj, "header_footer_title", &tmp) &&
+      !tmp.empty()) {
+    CefString(&settings.header_footer_title) = tmp;
+    tmp.clear();
+  }
+
+  if (GetJNIFieldString(env, cls, obj, "header_footer_url", &tmp) &&
+      !tmp.empty()) {
+    CefString(&settings.header_footer_url) = tmp;
+    tmp.clear();
+  }
+
+  GetJNIFieldBoolean(env, cls, obj, "landscape", &settings.landscape);
+
+  GetJNIFieldBoolean(env, cls, obj, "backgrounds_enabled",
+                     &settings.backgrounds_enabled);
+
+  GetJNIFieldInt(env, cls, obj, "page_width", &settings.page_width);
+
+  GetJNIFieldInt(env, cls, obj, "page_height", &settings.page_height);
+
+  GetJNIFieldBoolean(env, cls, obj, "selection_only", &settings.selection_only);
+
+  GetJNIFieldInt(env, cls, obj, "scale_factor", &settings.scale_factor);
+
+  jobject obj_margin_type = nullptr;
+  if (GetJNIFieldObject(env, cls, obj, "margin_type", &obj_margin_type,
+                        "Lorg/cef/misc/CefPdfPrintSettings$MarginType;")) {
+    ScopedJNIObjectLocal margin_type(env, obj_margin_type);
+    if (IsJNIEnumValue(env, margin_type,
+                       "org/cef/misc/CefPdfPrintSettings$MarginType",
+                       "DEFAULT")) {
+      settings.margin_type = PDF_PRINT_MARGIN_DEFAULT;
+    } else if (IsJNIEnumValue(env, margin_type,
+                              "org/cef/misc/CefPdfPrintSettings$MarginType",
+                              "NONE")) {
+      settings.margin_type = PDF_PRINT_MARGIN_NONE;
+    } else if (IsJNIEnumValue(env, margin_type,
+                              "org/cef/misc/CefPdfPrintSettings$MarginType",
+                              "MINIMUM")) {
+      settings.margin_type = PDF_PRINT_MARGIN_MINIMUM;
+    } else if (IsJNIEnumValue(env, margin_type,
+                              "org/cef/misc/CefPdfPrintSettings$MarginType",
+                              "CUSTOM")) {
+      settings.margin_type = PDF_PRINT_MARGIN_CUSTOM;
+    }
+  }
+
+  GetJNIFieldInt(env, cls, obj, "margin_top", &settings.margin_top);
+  GetJNIFieldInt(env, cls, obj, "margin_bottom", &settings.margin_bottom);
+  GetJNIFieldInt(env, cls, obj, "margin_right", &settings.margin_right);
+  GetJNIFieldInt(env, cls, obj, "margin_left", &settings.margin_left);
+
+  return settings;
+}
+
 }  // namespace
 
 JNIEXPORT jboolean JNICALL
@@ -1032,8 +1149,15 @@ Java_org_cef_browser_CefBrowser_1N_N_1CreateBrowser(JNIEnv* env,
                                                     jboolean transparent,
                                                     jobject canvas,
                                                     jobject jcontext) {
-  return create(env, jbrowser, NULL, jclientHandler, windowHandle, url, osr,
-                transparent, canvas, jcontext, NULL);
+  std::shared_ptr<JNIObjectsForCreate> objs(new JNIObjectsForCreate(
+      env, jbrowser, nullptr, jclientHandler, url, canvas, jcontext, nullptr));
+  if (CefCurrentlyOn(TID_UI)) {
+    create(objs, windowHandle, osr, transparent);
+  } else {
+    CefPostTask(TID_UI,
+                base::BindOnce(&create, objs, windowHandle, osr, transparent));
+  }
+  return JNI_FALSE;  // set asynchronously
 }
 
 JNIEXPORT jboolean JNICALL
@@ -1046,8 +1170,16 @@ Java_org_cef_browser_CefBrowser_1N_N_1CreateDevTools(JNIEnv* env,
                                                      jboolean transparent,
                                                      jobject canvas,
                                                      jobject inspect) {
-  return create(env, jbrowser, jparent, jclientHandler, windowHandle, NULL, osr,
-                transparent, canvas, NULL, inspect);
+  std::shared_ptr<JNIObjectsForCreate> objs(
+      new JNIObjectsForCreate(env, jbrowser, jparent, jclientHandler, nullptr,
+                              canvas, nullptr, inspect));
+  if (CefCurrentlyOn(TID_UI)) {
+    create(objs, windowHandle, osr, transparent);
+  } else {
+    CefPostTask(TID_UI,
+                base::BindOnce(&create, objs, windowHandle, osr, transparent));
+  }
+  return JNI_FALSE;  // set asynchronously
 }
 
 JNIEXPORT jlong JNICALL
@@ -1125,10 +1257,10 @@ Java_org_cef_browser_CefBrowser_1N_N_1GetIdentifier(JNIEnv* env, jobject obj) {
 
 JNIEXPORT jobject JNICALL
 Java_org_cef_browser_CefBrowser_1N_N_1GetMainFrame(JNIEnv* env, jobject obj) {
-  CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj, NULL);
+  CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj, nullptr);
   CefRefPtr<CefFrame> frame = browser->GetMainFrame();
   if (!frame)
-    return NULL;
+    return nullptr;
   ScopedJNIFrame jframe(env, frame);
   return jframe.Release();
 }
@@ -1136,10 +1268,10 @@ Java_org_cef_browser_CefBrowser_1N_N_1GetMainFrame(JNIEnv* env, jobject obj) {
 JNIEXPORT jobject JNICALL
 Java_org_cef_browser_CefBrowser_1N_N_1GetFocusedFrame(JNIEnv* env,
                                                       jobject obj) {
-  CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj, NULL);
+  CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj, nullptr);
   CefRefPtr<CefFrame> frame = browser->GetFocusedFrame();
   if (!frame)
-    return NULL;
+    return nullptr;
   ScopedJNIFrame jframe(env, frame);
   return jframe.Release();
 }
@@ -1148,10 +1280,10 @@ JNIEXPORT jobject JNICALL
 Java_org_cef_browser_CefBrowser_1N_N_1GetFrame(JNIEnv* env,
                                                jobject obj,
                                                jlong identifier) {
-  CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj, NULL);
+  CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj, nullptr);
   CefRefPtr<CefFrame> frame = browser->GetFrame(identifier);
   if (!frame)
-    return NULL;
+    return nullptr;
   ScopedJNIFrame jframe(env, frame);
   return jframe.Release();
 }
@@ -1160,10 +1292,10 @@ JNIEXPORT jobject JNICALL
 Java_org_cef_browser_CefBrowser_1N_N_1GetFrame2(JNIEnv* env,
                                                 jobject obj,
                                                 jstring name) {
-  CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj, NULL);
+  CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj, nullptr);
   CefRefPtr<CefFrame> frame = browser->GetFrame(GetJNIString(env, name));
   if (!frame)
-    return NULL;
+    return nullptr;
   ScopedJNIFrame jframe(env, frame);
   return jframe.Release();
 }
@@ -1177,7 +1309,7 @@ Java_org_cef_browser_CefBrowser_1N_N_1GetFrameCount(JNIEnv* env, jobject obj) {
 JNIEXPORT jobject JNICALL
 Java_org_cef_browser_CefBrowser_1N_N_1GetFrameIdentifiers(JNIEnv* env,
                                                           jobject obj) {
-  CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj, NULL);
+  CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj, nullptr);
   std::vector<int64> identifiers;
   browser->GetFrameIdentifiers(identifiers);
   return NewJNILongVector(env, identifiers);
@@ -1185,7 +1317,7 @@ Java_org_cef_browser_CefBrowser_1N_N_1GetFrameIdentifiers(JNIEnv* env,
 
 JNIEXPORT jobject JNICALL
 Java_org_cef_browser_CefBrowser_1N_N_1GetFrameNames(JNIEnv* env, jobject obj) {
-  CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj, NULL);
+  CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj, nullptr);
   std::vector<CefString> names;
   browser->GetFrameNames(names);
   return NewJNIStringVector(env, names);
@@ -1209,7 +1341,7 @@ JNIEXPORT void JNICALL
 Java_org_cef_browser_CefBrowser_1N_N_1ViewSource(JNIEnv* env, jobject obj) {
   CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj);
   CefRefPtr<CefFrame> mainFrame = browser->GetMainFrame();
-  CefPostTask(TID_UI, base::Bind(&CefFrame::ViewSource, mainFrame.get()));
+  CefPostTask(TID_UI, base::BindOnce(&CefFrame::ViewSource, mainFrame.get()));
 }
 
 JNIEXPORT void JNICALL
@@ -1280,7 +1412,7 @@ Java_org_cef_browser_CefBrowser_1N_N_1Close(JNIEnv* env,
       if (CefCurrentlyOn(TID_UI))
         util::DestroyCefBrowser(browser);
       else
-        CefPostTask(TID_UI, base::Bind(&util::DestroyCefBrowser, browser));
+        CefPostTask(TID_UI, base::BindOnce(&util::DestroyCefBrowser, browser));
     }
   } else {
     browser->GetHost()->CloseBrowser(false);
@@ -1292,11 +1424,7 @@ Java_org_cef_browser_CefBrowser_1N_N_1SetFocus(JNIEnv* env,
                                                jobject obj,
                                                jboolean enable) {
   CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj);
-  if (browser->GetHost()->IsWindowRenderingDisabled()) {
-    browser->GetHost()->SendFocusEvent(enable != JNI_FALSE);
-  } else {
-    browser->GetHost()->SetFocus(enable != JNI_FALSE);
-  }
+  browser->GetHost()->SetFocus(enable != JNI_FALSE);
 }
 
 JNIEXPORT void JNICALL
@@ -1324,7 +1452,7 @@ Java_org_cef_browser_CefBrowser_1N_N_1GetZoomLevel(JNIEnv* env, jobject obj) {
     CriticalLock lock;
     CriticalWait waitCond(&lock);
     lock.Lock();
-    CefPostTask(TID_UI, base::Bind(getZoomLevel, host, &waitCond, &result));
+    CefPostTask(TID_UI, base::BindOnce(getZoomLevel, host, &waitCond, &result));
     waitCond.Wait(1000);
     lock.Unlock();
   }
@@ -1455,8 +1583,8 @@ Java_org_cef_browser_CefBrowser_1N_N_1WasResized(JNIEnv* env,
     if (CefCurrentlyOn(TID_UI)) {
       util::SetWindowSize(browserHandle, width, height);
     } else {
-      CefPostTask(TID_UI, base::Bind(util::SetWindowSize, browserHandle,
-                                     (int)width, (int)height));
+      CefPostTask(TID_UI, base::BindOnce(util::SetWindowSize, browserHandle,
+                                         (int)width, (int)height));
     }
   }
 #endif
@@ -1473,7 +1601,7 @@ Java_org_cef_browser_CefBrowser_1N_N_1SendKeyEvent(JNIEnv* env,
                                                    jobject obj,
                                                    jobject key_event) {
   CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj);
-  jclass cls = env->GetObjectClass(key_event);
+  ScopedJNIClass cls(env, env->GetObjectClass(key_event));
   if (!cls)
     return;
 
@@ -1688,7 +1816,7 @@ Java_org_cef_browser_CefBrowser_1N_N_1SendMouseEvent(JNIEnv* env,
                                                      jobject obj,
                                                      jobject mouse_event) {
   CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj);
-  jclass cls = env->GetObjectClass(mouse_event);
+  ScopedJNIClass cls(env, env->GetObjectClass(mouse_event));
   if (!cls)
     return;
 
@@ -1753,7 +1881,7 @@ Java_org_cef_browser_CefBrowser_1N_N_1SendMouseWheelEvent(
     jobject obj,
     jobject mouse_wheel_event) {
   CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj);
-  jclass cls = env->GetObjectClass(mouse_wheel_event);
+  ScopedJNIClass cls(env, env->GetObjectClass(mouse_wheel_event));
   if (!cls)
     return;
 
@@ -1802,7 +1930,7 @@ Java_org_cef_browser_CefBrowser_1N_N_1DragTargetDragEnter(JNIEnv* env,
       GetCefFromJNIObject<CefDragData>(env, jdragData, "CefDragData");
   if (!drag_data.get())
     return;
-  jclass cls = FindClass(env, "java/awt/event/MouseEvent");
+  ScopedJNIClass cls(env, "java/awt/event/MouseEvent");
   if (!cls)
     return;
 
@@ -1821,7 +1949,7 @@ Java_org_cef_browser_CefBrowser_1N_N_1DragTargetDragOver(JNIEnv* env,
                                                          jobject pos,
                                                          jint jmodifiers,
                                                          jint allowedOps) {
-  jclass cls = FindClass(env, "java/awt/event/MouseEvent");
+  ScopedJNIClass cls(env, "java/awt/event/MouseEvent");
   if (!cls)
     return;
 
@@ -1846,7 +1974,7 @@ Java_org_cef_browser_CefBrowser_1N_N_1DragTargetDrop(JNIEnv* env,
                                                      jobject obj,
                                                      jobject pos,
                                                      jint jmodifiers) {
-  jclass cls = FindClass(env, "java/awt/event/MouseEvent");
+  ScopedJNIClass cls(env, "java/awt/event/MouseEvent");
   if (!cls)
     return;
 
@@ -1893,8 +2021,8 @@ Java_org_cef_browser_CefBrowser_1N_N_1UpdateUI(JNIEnv* env,
   if (CefCurrentlyOn(TID_UI)) {
     util::SetWindowBounds(windowHandle, contentRect);
   } else {
-    CefPostTask(TID_UI,
-                base::Bind(util::SetWindowBounds, windowHandle, contentRect));
+    CefPostTask(TID_UI, base::BindOnce(util::SetWindowBounds, windowHandle,
+                                       contentRect));
   }
 #endif
 }
@@ -1905,20 +2033,31 @@ Java_org_cef_browser_CefBrowser_1N_N_1SetParent(JNIEnv* env,
                                                 jlong windowHandle,
                                                 jobject canvas) {
   CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj);
-  const base::Closure& callback = base::Bind(OnAfterParentChanged, browser);
+  base::OnceClosure callback = base::BindOnce(&OnAfterParentChanged, browser);
 
 #if defined(OS_MACOSX)
   util::SetParent(browser->GetHost()->GetWindowHandle(), windowHandle,
-                  callback);
+                  std::move(callback));
 #else
   CefWindowHandle browserHandle = browser->GetHost()->GetWindowHandle();
   CefWindowHandle parentHandle =
       canvas ? util::GetWindowHandle(env, canvas) : kNullWindowHandle;
   if (CefCurrentlyOn(TID_UI)) {
-    util::SetParent(browserHandle, parentHandle, callback);
+    util::SetParent(browserHandle, parentHandle, std::move(callback));
   } else {
-    CefPostTask(TID_UI, base::Bind(util::SetParent, browserHandle, parentHandle,
-                                   callback));
+#if defined(OS_LINUX)
+    CriticalLock lock;
+    CriticalWait waitCond(&lock);
+    lock.Lock();
+    CefPostTask(TID_UI,
+                base::BindOnce(util::SetParentSync, browserHandle, parentHandle,
+                               &waitCond, std::move(callback)));
+    waitCond.Wait(1000);
+    lock.Unlock();
+#else
+    CefPostTask(TID_UI, base::BindOnce(util::SetParent, browserHandle,
+                                       parentHandle, std::move(callback)));
+#endif
   }
 #endif
 }

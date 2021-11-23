@@ -3,7 +3,7 @@
 :: reserved. Use of this source code is governed by a BSD-style license
 :: that can be found in the LICENSE file.
 
-set RC=
+set RETURNCODE=
 setlocal
 cd ..
 
@@ -17,18 +17,18 @@ set OUT_PATH=".\out\%1"
 set CLS_PATH=".\third_party\jogamp\jar\*;.\third_party\junit\*;.\java"
 
 if not exist %OUT_PATH% mkdir %OUT_PATH%
-javac -Xdiags:verbose -cp %CLS_PATH% -d %OUT_PATH% java/tests/detailed/*.java java/tests/junittests/*.java java/tests/simple/*.java java/org/cef/*.java java/org/cef/browser/*.java java/org/cef/callback/*.java java/org/cef/handler/*.java java/org/cef/misc/*.java java/org/cef/network/*.java java/org/cef/security/*.java
+javac -Xdiags:verbose -cp %CLS_PATH% -d %OUT_PATH% java/tests/detailed/*.java java/tests/detailed/ui/*.java java/tests/detailed/dialog/*.java java/tests/detailed/handler/*.java java/tests/junittests/*.java java/tests/simple/*.java java/org/cef/*.java java/org/cef/browser/*.java java/org/cef/callback/*.java java/org/cef/handler/*.java java/org/cef/misc/*.java java/org/cef/network/*.java java/org/cef/security/*.java
 
 :: Copy resource files.
 xcopy /sfy .\java\tests\detailed\handler\*.html %OUT_PATH%\tests\detailed\handler\
 xcopy /sfy .\java\tests\detailed\handler\*.png %OUT_PATH%\tests\detailed\handler\
 
 :end
-endlocal & set RC=%ERRORLEVEL%
+endlocal & set RETURNCODE=%ERRORLEVEL%
 goto omega
 
 :returncode
-exit /B %RC%
+exit /B %RETURNCODE%
 
 :omega
-call :returncode %RC%
+call :returncode %RETURNCODE%

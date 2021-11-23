@@ -16,9 +16,9 @@ class CefSelectClientCertificateCallback_N extends CefNativeAdapter implements C
     }
 
     @Override
-    public void Select(CefX509Certificate selectedcertif) {
+    public void select(CefX509Certificate selectedcertif) {
         try {
-        
+
             N_Select(getNativeRef(null),selectedcertif);
         } catch (UnsatisfiedLinkError ule) {
             ule.printStackTrace();
@@ -34,9 +34,7 @@ class CefSelectClientCertificateCallback_N extends CefNativeAdapter implements C
         }
     }
 
-    
-    
     private final native void N_Select(long self,CefX509Certificate selectedcertif);
     private final native void N_Cancel(long self);
-    
+
 }

@@ -7,14 +7,12 @@ package org.cef.handler;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.callback.CefAuthCallback;
-import org.cef.callback.CefRequestCallback;
+import org.cef.callback.CefCallback;
 import org.cef.callback.CefSelectClientCertificateCallback;
 import org.cef.misc.BoolRef;
 import org.cef.network.CefRequest;
 import org.cef.network.CefURLRequest;
 import org.cef.security.CefX509Certificate;
-
-
 
 /**
  * Implement this interface to handle events related to browser requests. The methods of this class
@@ -50,6 +48,23 @@ public interface CefRequestHandler {
      */
     boolean onBeforeBrowse(CefBrowser browser, CefFrame frame, CefRequest request,
             boolean user_gesture, boolean is_redirect);
+
+    /**
+     * Called on the UI thread before OnBeforeBrowse in certain limited cases
+     * where navigating a new or different browser might be desirable. This
+     * includes user-initiated navigation that might open in a special way (e.g.
+     * links clicked via middle-click or ctrl + left-click) and certain types of
+     * cross-origin navigation initiated from the renderer process (e.g.
+     * navigating the top-level frame to/from a file URL).
+     *
+     * @param browser The corresponding browser.
+     * @param frame The frame generating the event. Instance only valid within the scope of this
+     *         method
+     * @param user_gesture True if the request was initiated by a user gesture.
+     * @return True to cancel navigation or false to continue
+     */
+    boolean onOpenURLFromTab(CefBrowser browser, CefFrame frame, String target_url,
+            boolean user_gesture);
 
     /**
      * Called on the IO thread before a resource request is initiated. The |browser| and |frame|
@@ -97,12 +112,12 @@ public interface CefRequestHandler {
      * @param browser The corresponding browser.
      * @param origin_url Origin of the page making the request.
      * @param new_size Requested quota size in bytes.
-     * @param callback Call CefRequestCallback.Continue() either in this method or at a later time
+     * @param callback Call CefCallback.Continue() either in this method or at a later time
      *         to grant or deny the request.
      * @return True to handle the request (callback must be executed) or false to cancel.
      */
     boolean onQuotaRequest(
-            CefBrowser browser, String origin_url, long new_size, CefRequestCallback callback);
+            CefBrowser browser, String origin_url, long new_size, CefCallback callback);
 
     /**
      * Called on the UI thread to handle requests for URLs with an invalid SSL certificate. If
@@ -112,22 +127,31 @@ public interface CefRequestHandler {
      * @param browser The corresponding browser.
      * @param cert_error Error code describing the error.
      * @param request_url The requesting URL.
-     * @param callback Call CefRequestCallback.Continue() either in this method or at a later time
+     * @param callback Call CefCallback.Continue() either in this method or at a later time
      *         to continue or cancel the request. If null the error cannot be recovered from and the
      *         request will be canceled automatically.
      * @return True to handle the request (callback must be executed) or false to reject it.
      */
     boolean onCertificateError(CefBrowser browser, CefLoadHandler.ErrorCode cert_error,
-            String request_url, CefRequestCallback callback);
+            String request_url, CefCallback callback);
 
-
-	boolean onSelectClientCertificate(CefBrowser browser, 
-      boolean isProxy,
-      String host,
-      int port,
-      final CefX509Certificate[] certificates,
-      CefSelectClientCertificateCallback callback);
-
+    /**
+     * Called on the UI thread once when the browser needs a SSL certificate.
+     *
+     * @param browser The corresponding browser.
+     * @param isProxy True if the host is a proxy server.
+     * @param host Hostname.
+     * @param port Port number.
+     * @param certificates Available certificates
+     * @param callback Call CefSelectClientCertificateCallback.select(CefX509Certificate) to select specific certificate
+     * @return True to handle the request (callback must be executed) or false to reject it.
+     */
+    boolean onSelectClientCertificate(CefBrowser browser,
+            boolean isProxy,
+            String host,
+            int port,
+            final CefX509Certificate[] certificates,
+            CefSelectClientCertificateCallback callback);
 
     /**
      * Called on the browser process UI thread when a plugin has crashed.
