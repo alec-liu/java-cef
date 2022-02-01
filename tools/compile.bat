@@ -25,6 +25,9 @@ xcopy /sfy .\java\manifest %OUT_PATH%\manifest\
 :: Copy MANIFEST.MF
 xcopy /sfy .\java\manifest %OUT_PATH%\manifest\
 
+:: Copy MANIFEST.MF
+xcopy /sfy .\java\manifest %OUT_PATH%\manifest\
+
 :: Copy resource files.
 xcopy /sfy .\java\tests\detailed\handler\*.html %OUT_PATH%\tests\detailed\handler\
 xcopy /sfy .\java\tests\detailed\handler\*.png %OUT_PATH%\tests\detailed\handler\
