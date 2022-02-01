@@ -63,7 +63,7 @@ class RequestHandler : public CefRequestHandler {
       const CefString& host,
       int port,
       const X509CertificateList& certificates,
-      CefRefPtr<CefSelectClientCertificateCallback> callback)  override;
+      CefRefPtr<CefSelectClientCertificateCallback> callback) override;
 
  protected:
   ScopedJNIObjectGlobal handle_;

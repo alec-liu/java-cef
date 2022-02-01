@@ -2,7 +2,6 @@
 
 #include "jni_scoped_helpers.h"
 
-
 namespace {
 
 CefRefPtr<CefX509Certificate> GetSelf(jlong self) {
@@ -10,18 +9,18 @@ CefRefPtr<CefX509Certificate> GetSelf(jlong self) {
 }
 
 void ClearSelf(JNIEnv* env, jobject obj) {
-
-  SetCefForJNIObject<CefX509Certificate>(env, obj, nullptr, "CefX509Certificate");
+  SetCefForJNIObject<CefX509Certificate>(env, obj, nullptr,
+                                         "CefX509Certificate");
 }
 
-}  // namespac
+}  // namespace
 
-JNIEXPORT void JNICALL Java_org_cef_security_CefX509Certificate_1N_N_1Release(JNIEnv* env,
+JNIEXPORT void JNICALL
+Java_org_cef_security_CefX509Certificate_1N_N_1Release(JNIEnv* env,
                                                        jobject obj,
-                                                       jlong self)
-  {
-	    CefRefPtr<CefX509Certificate> medium = GetSelf(self);
+                                                       jlong self) {
+  CefRefPtr<CefX509Certificate> medium = GetSelf(self);
   if (!medium)
     return;
-    ClearSelf(env,obj);
-  }
+  ClearSelf(env, obj);
+}

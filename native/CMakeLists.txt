@@ -26,18 +26,18 @@ set(JCEF_SRCS
   CefContextMenuParams_N.h
   CefCookieManager_N.cpp
   CefCookieManager_N.h
-  CefDownloadItemCallback_N.cpp
-  CefDownloadItemCallback_N.h
   CefDownloadItem_N.cpp
   CefDownloadItem_N.h
+  CefDownloadItemCallback_N.cpp
+  CefDownloadItemCallback_N.h
   CefDragData_N.cpp
   CefDragData_N.h
   CefFileDialogCallback_N.cpp
   CefFileDialogCallback_N.h
   CefFrame_N.cpp
   CefFrame_N.h
-  CefJSDialogCallback_N.h
   CefJSDialogCallback_N.cpp
+  CefJSDialogCallback_N.h
   CefMenuModel_N.cpp
   CefMenuModel_N.h
   CefMessageRouter_N.cpp
@@ -56,20 +56,22 @@ set(JCEF_SRCS
   CefQueryCallback_N.h
   CefRequest_N.cpp
   CefRequest_N.h
-  CefCallback_N.cpp
-  CefCallback_N.h
   CefRequestContext_N.cpp
   CefRequestContext_N.h
   CefResponse_N.cpp
   CefResponse_N.h
   CefSchemeRegistrar_N.cpp
   CefSchemeRegistrar_N.h
+  CefSelectClientCertificateCallback_N.cpp
+  CefSelectClientCertificateCallback_N.h
   CefURLRequest_N.cpp
   CefURLRequest_N.h
   CefWebPluginInfo_N.cpp
   CefWebPluginInfo_N.h
   CefWebPluginManager_N.cpp
   CefWebPluginManager_N.h
+  CefX509Certificate_N.cpp
+  CefX509Certificate_N.h
   browser_process_handler.cpp
   browser_process_handler.h
   client_app.cpp
@@ -78,10 +80,10 @@ set(JCEF_SRCS
   client_handler.h
   completion_callback.cpp
   completion_callback.h
-  context.cpp
-  context.h
   context_menu_handler.cpp
   context_menu_handler.h
+  context.cpp
+  context.h
   cookie_access_filter.cpp
   cookie_access_filter.h
   cookie_visitor.cpp
@@ -98,10 +100,10 @@ set(JCEF_SRCS
   focus_handler.cpp
   focus_handler.h
   jcef_version.h
-  jni_scoped_helpers.h
   jni_scoped_helpers.cpp
-  jni_util.h
+  jni_scoped_helpers.h
   jni_util.cpp
+  jni_util.h
   jsdialog_handler.cpp
   jsdialog_handler.h
   keyboard_handler.cpp
@@ -144,10 +146,6 @@ set(JCEF_SRCS
   window_handler.h
   write_handler.cpp
   write_handler.h
-  CefSelectClientCertificateCallback_N.h
-  CefSelectClientCertificateCallback_N.cpp
-  CefX509Certificate_N.h
-  CefX509Certificate_N.cpp
  )
 set(JCEF_SRCS_LINUX
   critical_wait_posix.cpp

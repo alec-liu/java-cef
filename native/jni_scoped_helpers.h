@@ -16,12 +16,12 @@
 #include "include/cef_menu_model.h"
 #include "include/cef_print_settings.h"
 #include "include/cef_request.h"
+#include "include/cef_request_context_handler.h"
+#include "include/cef_request_handler.h"
 #include "include/cef_resource_request_handler.h"
 #include "include/cef_response.h"
-#include "include/wrapper/cef_message_router.h"
-#include "include/cef_request_context_handler.h"
 #include "include/cef_x509_certificate.h"
-#include "include/cef_request_handler.h"
+#include "include/wrapper/cef_message_router.h"
 
 //
 // --------
@@ -752,16 +752,20 @@ class ScopedJNIAuthCallback : public ScopedJNIObject<CefAuthCallback> {
 };
 
 // JNI CefSelectClientCertificateCallback object.
-class ScopedJNISelectClientCertificateCallback : public ScopedJNIObject<CefSelectClientCertificateCallback> {
+class ScopedJNISelectClientCertificateCallback
+    : public ScopedJNIObject<CefSelectClientCertificateCallback> {
  public:
   // If |obj| is nullptr the SetHandle method should be used.
-  ScopedJNISelectClientCertificateCallback(JNIEnv* env, CefRefPtr<CefSelectClientCertificateCallback> obj = nullptr);
+  ScopedJNISelectClientCertificateCallback(
+      JNIEnv* env,
+      CefRefPtr<CefSelectClientCertificateCallback> obj = nullptr);
 };
 
 class ScopedJNICefX509Certificate : public ScopedJNIObject<CefX509Certificate> {
  public:
   // If |obj| is nullptr the SetHandle method should be used.
-  ScopedJNICefX509Certificate(JNIEnv* env, CefRefPtr<CefX509Certificate> obj = nullptr);
+  ScopedJNICefX509Certificate(JNIEnv* env,
+                              CefRefPtr<CefX509Certificate> obj = nullptr);
 };
 
 // JNI CefDragData object.

@@ -15,6 +15,7 @@ import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.callback.CefAuthCallback;
 import org.cef.callback.CefCallback;
+import org.cef.callback.CefSelectClientCertificateCallback;
 import org.cef.handler.CefCookieAccessFilter;
 import org.cef.handler.CefLifeSpanHandler;
 import org.cef.handler.CefLoadHandler;
@@ -28,7 +29,6 @@ import org.cef.network.CefRequest.TransitionType;
 import org.cef.network.CefResponse;
 import org.cef.network.CefURLRequest;
 import org.cef.security.CefX509Certificate;
-import org.cef.callback.CefSelectClientCertificateCallback;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -220,8 +220,8 @@ class TestFrame extends JFrame implements CefLifeSpanHandler, CefLoadHandler, Ce
     }
 
     @Override
-    public boolean onOpenURLFromTab(CefBrowser browser, CefFrame frame, String target_url,
-            boolean user_gesture) {
+    public boolean onOpenURLFromTab(
+            CefBrowser browser, CefFrame frame, String target_url, boolean user_gesture) {
         return false;
     }
 
@@ -308,7 +308,9 @@ class TestFrame extends JFrame implements CefLifeSpanHandler, CefLoadHandler, Ce
             CefBrowser browser, CefFrame frame, CefRequest request, BoolRef allowOsExecution) {}
 
     @Override
-    public boolean onSelectClientCertificate(CefBrowser browser, boolean isProxy, String host, int port,CefX509Certificate[] certificates, CefSelectClientCertificateCallback callback) {
+    public boolean onSelectClientCertificate(CefBrowser browser, boolean isProxy, String host,
+            int port, CefX509Certificate[] certificates,
+            CefSelectClientCertificateCallback callback) {
         return false;
     }
 }

@@ -12,8 +12,8 @@ extern "C" {
  * Method:    N_Release
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL Java_org_cef_security_CefX509Certificate_1N_N_1Release
-  (JNIEnv *, jobject, jlong);
+JNIEXPORT void JNICALL
+Java_org_cef_security_CefX509Certificate_1N_N_1Release(JNIEnv*, jobject, jlong);
 
 #ifdef __cplusplus
 }

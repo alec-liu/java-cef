@@ -189,13 +189,14 @@ bool GetJNIPoint(JNIEnv* env, jobject obj, int* x, int* y);
 // Get the existing CEF browser counterpart.
 CefRefPtr<CefBrowser> GetJNIBrowser(JNIEnv* env, jobject jbrowser);
 
-CefRefPtr<CefX509Certificate> GetJNIX509Certificate(JNIEnv* env, jobject jX509Certificate);
+CefRefPtr<CefX509Certificate> GetJNIX509Certificate(JNIEnv* env,
+                                                    jobject jX509Certificate);
 
-jobjectArray NewJNIX509CertificateArray(JNIEnv* env,
-                                        const CefRequestHandler::X509CertificateList& certs);
+jobjectArray NewJNIX509CertificateArray(
+    JNIEnv* env,
+    const CefRequestHandler::X509CertificateList& certs);
 
-jobject NewJNIX509Certificate(JNIEnv* env,
-                              CefRefPtr<CefX509Certificate> cert);
+jobject NewJNIX509Certificate(JNIEnv* env, CefRefPtr<CefX509Certificate> cert);
 
 jobject GetJNIEnumValue(JNIEnv* env,
                         const char* class_name,

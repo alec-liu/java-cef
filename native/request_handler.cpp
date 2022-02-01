@@ -203,12 +203,12 @@ bool RequestHandler::OnCertificateError(CefRefPtr<CefBrowser> browser,
 }
 
 bool RequestHandler::OnSelectClientCertificate(
-      CefRefPtr<CefBrowser> browser,
-      bool isProxy,
-      const CefString& host,
-      int port,
-      const X509CertificateList& certificates,
-      CefRefPtr<CefSelectClientCertificateCallback> callback) {
+    CefRefPtr<CefBrowser> browser,
+    bool isProxy,
+    const CefString& host,
+    int port,
+    const X509CertificateList& certificates,
+    CefRefPtr<CefSelectClientCertificateCallback> callback) {
   ScopedJNIEnv env;
   if (!env)
     return false;
@@ -217,15 +217,15 @@ bool RequestHandler::OnSelectClientCertificate(
   jobjectArray jcertificates = NewJNIX509CertificateArray(env, certificates);
   ScopedJNISelectClientCertificateCallback jcallback(env, callback);
   jboolean jresult = JNI_FALSE;
-  JNI_CALL_METHOD(
-      env, handle_, "onSelectClientCertificate",
+  JNI_CALL_METHOD(env, handle_, "onSelectClientCertificate",
                   "(Lorg/cef/browser/CefBrowser;ZLjava/lang/"
                   "String;I[Lorg/cef/security/CefX509Certificate;Lorg/cef/"
                   "callback/CefSelectClientCertificateCallback;)Z",
-      Boolean, jresult, jbrowser.get(),(isProxy ? JNI_TRUE : JNI_FALSE), jhost.get(), port,
-      jcertificates, jcallback.get());
+                  Boolean, jresult, jbrowser.get(),
+                  (isProxy ? JNI_TRUE : JNI_FALSE), jhost.get(), port,
+                  jcertificates, jcallback.get());
 
-	if (jresult == JNI_FALSE) {
+  if (jresult == JNI_FALSE) {
     // If the Java method returns "false" the callback won't be used and
     // the reference can therefore be removed.
     jcallback.SetTemporary();

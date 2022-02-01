@@ -63,8 +63,8 @@ public interface CefRequestHandler {
      * @param user_gesture True if the request was initiated by a user gesture.
      * @return True to cancel navigation or false to continue
      */
-    boolean onOpenURLFromTab(CefBrowser browser, CefFrame frame, String target_url,
-            boolean user_gesture);
+    boolean onOpenURLFromTab(
+            CefBrowser browser, CefFrame frame, String target_url, boolean user_gesture);
 
     /**
      * Called on the IO thread before a resource request is initiated. The |browser| and |frame|
@@ -143,15 +143,12 @@ public interface CefRequestHandler {
      * @param host Hostname.
      * @param port Port number.
      * @param certificates Available certificates
-     * @param callback Call CefSelectClientCertificateCallback.select(CefX509Certificate) to select specific certificate
+     * @param callback Call CefSelectClientCertificateCallback.select(CefX509Certificate) to select
+     *         specific certificate
      * @return True to handle the request (callback must be executed) or false to reject it.
      */
-    boolean onSelectClientCertificate(CefBrowser browser,
-            boolean isProxy,
-            String host,
-            int port,
-            final CefX509Certificate[] certificates,
-            CefSelectClientCertificateCallback callback);
+    boolean onSelectClientCertificate(CefBrowser browser, boolean isProxy, String host, int port,
+            final CefX509Certificate[] certificates, CefSelectClientCertificateCallback callback);
 
     /**
      * Called on the browser process UI thread when a plugin has crashed.

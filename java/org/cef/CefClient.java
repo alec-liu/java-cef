@@ -832,20 +832,22 @@ public class CefClient extends CefClientHandler
     }
 
     @Override
-    public boolean onCertificateError(CefBrowser browser, ErrorCode cert_error, String request_url,
-            CefCallback callback) {
+    public boolean onCertificateError(
+            CefBrowser browser, ErrorCode cert_error, String request_url, CefCallback callback) {
         if (requestHandler_ != null)
             return requestHandler_.onCertificateError(browser, cert_error, request_url, callback);
         return false;
     }
 
     @Override
-    public boolean onSelectClientCertificate(CefBrowser browser, boolean isProxy, String host, int port,
-			final CefX509Certificate[] certificates, CefSelectClientCertificateCallback callback) {
-		if (requestHandler_ != null && browser != null)
-			return requestHandler_.onSelectClientCertificate(browser, isProxy, host, port, certificates, callback);
-		return false;
-	}
+    public boolean onSelectClientCertificate(CefBrowser browser, boolean isProxy, String host,
+            int port, final CefX509Certificate[] certificates,
+            CefSelectClientCertificateCallback callback) {
+        if (requestHandler_ != null && browser != null)
+            return requestHandler_.onSelectClientCertificate(
+                    browser, isProxy, host, port, certificates, callback);
+        return false;
+    }
 
     @Override
     public void onPluginCrashed(CefBrowser browser, String pluginPath) {

@@ -70,8 +70,8 @@ public class RequestHandler extends CefResourceRequestHandlerAdapter implements 
     }
 
     @Override
-    public boolean onOpenURLFromTab(CefBrowser browser, CefFrame frame, String target_url,
-            boolean user_gesture) {
+    public boolean onOpenURLFromTab(
+            CefBrowser browser, CefFrame frame, String target_url, boolean user_gesture) {
         return false;
     }
 
@@ -180,30 +180,25 @@ public class RequestHandler extends CefResourceRequestHandlerAdapter implements 
         System.out.println("render process terminated: " + status);
     }
 
-	@Override
-	public boolean onSelectClientCertificate(CefBrowser browser, boolean isProxy, String host, int port,
-			CefX509Certificate[] certificates, CefSelectClientCertificateCallback callback) {
-		System.out.println("nb of certificates presented to chromium " + certificates.length);
-		if(certificates.length>1)
-		{
+    @Override
+    public boolean onSelectClientCertificate(CefBrowser browser, boolean isProxy, String host,
+            int port, CefX509Certificate[] certificates,
+            CefSelectClientCertificateCallback callback) {
+        System.out.println("nb of certificates presented to chromium " + certificates.length);
+        if (certificates.length > 1) {
+            System.out.println("which one should we choose? ");
+            // please add a hook to select which one and remove the default choice below
 
-			System.out.println("which one should we choose? ");
-			//please add a hook to select which one and remove the default choice below
-
-			callback.select(certificates[0]);
-			// using the first certif in the list (this is the default behaviour without
-						// callback)
-			return true;
-		}
-		else
-		{
-			System.out.println("only one certificate...the choice is a no brainer ");
-			callback.select(certificates[0]);
-			// using the first certif in the list (this is the default behaviour without
-			// callback)
-			return true;
-
-		}
-
-	}
+            callback.select(certificates[0]);
+            // using the first certif in the list (this is the default behaviour without
+            // callback)
+            return true;
+        } else {
+            System.out.println("only one certificate...the choice is a no brainer ");
+            callback.select(certificates[0]);
+            // using the first certif in the list (this is the default behaviour without
+            // callback)
+            return true;
+        }
+    }
 }

@@ -6,20 +6,20 @@ package org.cef.callback;
 
 import org.cef.security.CefX509Certificate;
 
-class CefSelectClientCertificateCallback_N extends CefNativeAdapter implements CefSelectClientCertificateCallback {
+class CefSelectClientCertificateCallback_N
+        extends CefNativeAdapter implements CefSelectClientCertificateCallback {
     CefSelectClientCertificateCallback_N() {}
 
     @Override
     protected void finalize() throws Throwable {
-    	cancel();
+        cancel();
         super.finalize();
     }
 
     @Override
     public void select(CefX509Certificate selectedcertif) {
         try {
-
-            N_Select(getNativeRef(null),selectedcertif);
+            N_Select(getNativeRef(null), selectedcertif);
         } catch (UnsatisfiedLinkError ule) {
             ule.printStackTrace();
         }
@@ -34,7 +34,6 @@ class CefSelectClientCertificateCallback_N extends CefNativeAdapter implements C
         }
     }
 
-    private final native void N_Select(long self,CefX509Certificate selectedcertif);
+    private final native void N_Select(long self, CefX509Certificate selectedcertif);
     private final native void N_Cancel(long self);
-
 }
