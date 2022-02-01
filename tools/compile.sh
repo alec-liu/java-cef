@@ -20,12 +20,6 @@ else
   # Copy MANIFEST.MF
   rsync -a "${JAVA_PATH}"/manifest/MANIFEST.MF $OUT_PATH/manifest/
 
-  # Copy MANIFEST.MF
-  rsync -a "${JAVA_PATH}"/manifest/MANIFEST.MF $OUT_PATH/manifest/
-
-  # Copy MANIFEST.MF
-  rsync -a "${JAVA_PATH}"/manifest/MANIFEST.MF $OUT_PATH/manifest/
-
   # Copy resource files.
   cp -f "${JAVA_PATH}"/tests/detailed/handler/*.html "$OUT_PATH/tests/detailed/handler"
   cp -f "${JAVA_PATH}"/tests/detailed/handler/*.png "$OUT_PATH/tests/detailed/handler"
