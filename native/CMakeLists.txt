@@ -64,8 +64,12 @@ set(JCEF_SRCS
   CefResponse_N.h
   CefSchemeRegistrar_N.cpp
   CefSchemeRegistrar_N.h
+  CefSelectClientCertificateCallback_N.cpp
+  CefSelectClientCertificateCallback_N.h
   CefURLRequest_N.cpp
   CefURLRequest_N.h
+  CefX509Certificate_N.cpp
+  CefX509Certificate_N.h
   browser_process_handler.cpp
   browser_process_handler.h
   client_app.cpp

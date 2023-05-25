@@ -5,6 +5,7 @@
 #include "jni_util.h"
 
 #include <jawt.h>
+
 #include <algorithm>
 
 #include "jni_scoped_helpers.h"
@@ -1042,4 +1043,56 @@ bool IsJNIEnumValue(JNIEnv* env,
     return (isEqual != JNI_FALSE);
   }
   return false;
+}
+
+CefRefPtr<CefX509Certificate> GetJNIX509Certificate(JNIEnv* env,
+                                                    jobject jX509Certificate) {
+  return GetCefFromJNIObject<CefX509Certificate>(env, jX509Certificate,
+                                                 "CefX509Certificate");
+}
+
+jobjectArray NewJNIX509CertificateArray(
+    JNIEnv* env,
+    const CefRequestHandler::X509CertificateList& certs) {
+  if (certs.empty())
+    return NULL;
+
+  ScopedJNIClass cls(env, "org/cef/security/CefX509Certificate");
+  if (!cls)
+    return NULL;
+
+  jobjectArray arr =
+      env->NewObjectArray(static_cast<jsize>(certs.size()), cls, NULL);
+
+  for (jsize i = 0; i < static_cast<jsize>(certs.size()); i++) {
+    env->SetObjectArrayElement(arr, i, NewJNIX509Certificate(env, certs.at(i)));
+  }
+
+  return arr;
+}
+
+jobject NewJNIX509Certificate(JNIEnv* env, CefRefPtr<CefX509Certificate> cert) {
+  ScopedJNIClass cls(env, "org/cef/security/CefX509Certificate");
+  if (!cls)
+    return NULL;
+  jmethodID writeBufferMethodID =
+      env->GetMethodID(cls, "addDEREncodedCertificateToTheChain", "([B)V");
+
+  ScopedJNICefX509Certificate scopedcrt =
+      ScopedJNICefX509Certificate(env, cert);
+  CefX509Certificate::IssuerChainBinaryList der_chain_list;
+  cert->GetDEREncodedIssuerChain(der_chain_list);
+  der_chain_list.insert(der_chain_list.begin(), cert->GetDEREncoded());
+
+  std::vector<CefRefPtr<CefBinaryValue>>::const_iterator iter;
+
+  for (iter = der_chain_list.begin(); iter != der_chain_list.end(); ++iter) {
+    jbyteArray derarray = env->NewByteArray((jsize)iter->get()->GetSize());
+    void* temp = env->GetPrimitiveArrayCritical((jarray)derarray, 0);
+    iter->get()->GetData(temp, iter->get()->GetSize(), 0);
+    env->CallVoidMethod(scopedcrt.get(), writeBufferMethodID, derarray);
+    env->ReleasePrimitiveArrayCritical(derarray, temp, 0);
+  }
+
+  return scopedcrt.Release();
 }

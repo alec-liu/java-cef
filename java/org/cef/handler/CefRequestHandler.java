@@ -8,9 +8,11 @@ import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.callback.CefAuthCallback;
 import org.cef.callback.CefCallback;
+import org.cef.callback.CefSelectClientCertificateCallback;
 import org.cef.misc.BoolRef;
 import org.cef.network.CefRequest;
 import org.cef.network.CefURLRequest;
+import org.cef.security.CefX509Certificate;
 
 /**
  * Implement this interface to handle events related to browser requests. The methods of this class
@@ -118,6 +120,21 @@ public interface CefRequestHandler {
      */
     boolean onCertificateError(CefBrowser browser, CefLoadHandler.ErrorCode cert_error,
             String request_url, CefCallback callback);
+
+    /**
+     * Called on the UI thread once when the browser needs a SSL certificate.
+     *
+     * @param browser The corresponding browser.
+     * @param isProxy True if the host is a proxy server.
+     * @param host Hostname.
+     * @param port Port number.
+     * @param certificates Available certificates
+     * @param callback Call CefSelectClientCertificateCallback.select(CefX509Certificate) to select
+     *         specific certificate
+     * @return True to handle the request (callback must be executed) or false to reject it.
+     */
+    boolean onSelectClientCertificate(CefBrowser browser, boolean isProxy, String host, int port,
+            final CefX509Certificate[] certificates, CefSelectClientCertificateCallback callback);
 
     /**
      * Called on the browser process UI thread when the render process terminates unexpectedly.

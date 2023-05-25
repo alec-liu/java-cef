@@ -8,6 +8,7 @@ import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.callback.CefAuthCallback;
 import org.cef.callback.CefCallback;
+import org.cef.callback.CefSelectClientCertificateCallback;
 import org.cef.handler.CefLoadHandler.ErrorCode;
 import org.cef.handler.CefRequestHandler;
 import org.cef.handler.CefResourceHandler;
@@ -17,11 +18,14 @@ import org.cef.misc.BoolRef;
 import org.cef.network.CefPostData;
 import org.cef.network.CefPostDataElement;
 import org.cef.network.CefRequest;
+import org.cef.security.CefX509Certificate;
 
 import java.awt.Frame;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Vector;
 
+import javax.security.cert.X509Certificate;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -163,5 +167,27 @@ public class RequestHandler extends CefResourceRequestHandlerAdapter implements 
     @Override
     public void onRenderProcessTerminated(CefBrowser browser, TerminationStatus status) {
         System.out.println("render process terminated: " + status);
+    }
+
+    @Override
+    public boolean onSelectClientCertificate(CefBrowser browser, boolean isProxy, String host,
+            int port, CefX509Certificate[] certificates,
+            CefSelectClientCertificateCallback callback) {
+        System.out.println("nb of certificates presented to chromium " + certificates.length);
+        if (certificates.length > 1) {
+            System.out.println("which one should we choose? ");
+            // please add a hook to select which one and remove the default choice below
+
+            callback.select(certificates[0]);
+            // using the first certif in the list (this is the default behaviour without
+            // callback)
+            return true;
+        } else {
+            System.out.println("only one certificate...the choice is a no brainer ");
+            callback.select(certificates[0]);
+            // using the first certif in the list (this is the default behaviour without
+            // callback)
+            return true;
+        }
     }
 }

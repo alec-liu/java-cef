@@ -35,5 +35,6 @@ else
   "${DIR}"/make_jni_header.sh $1 org.cef.network.CefRequest_N
   "${DIR}"/make_jni_header.sh $1 org.cef.network.CefResponse_N
   "${DIR}"/make_jni_header.sh $1 org.cef.network.CefURLRequest_N
+  "${DIR}"/make_jni_header.sh $1 org.cef.callback.CefSelectClientCertificateCallback_N
 fi
 

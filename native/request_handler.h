@@ -9,7 +9,6 @@
 #include <jni.h>
 
 #include "include/cef_request_handler.h"
-
 #include "jni_scoped_helpers.h"
 
 // RequestHandler implementation.
@@ -51,6 +50,14 @@ class RequestHandler : public CefRequestHandler {
                           CefRefPtr<CefCallback> callback) override;
   void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
                                  TerminationStatus status) override;
+
+  bool OnSelectClientCertificate(
+      CefRefPtr<CefBrowser> browser,
+      bool isProxy,
+      const CefString& host,
+      int port,
+      const X509CertificateList& certificates,
+      CefRefPtr<CefSelectClientCertificateCallback> callback) override;
 
  protected:
   ScopedJNIObjectGlobal handle_;

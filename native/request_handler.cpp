@@ -174,6 +174,38 @@ bool RequestHandler::OnCertificateError(CefRefPtr<CefBrowser> browser,
   return (jresult != JNI_FALSE);
 }
 
+bool RequestHandler::OnSelectClientCertificate(
+    CefRefPtr<CefBrowser> browser,
+    bool isProxy,
+    const CefString& host,
+    int port,
+    const X509CertificateList& certificates,
+    CefRefPtr<CefSelectClientCertificateCallback> callback) {
+  ScopedJNIEnv env;
+  if (!env)
+    return false;
+  ScopedJNIBrowser jbrowser(env, browser);
+  ScopedJNIString jhost(env, host);
+  jobjectArray jcertificates = NewJNIX509CertificateArray(env, certificates);
+  ScopedJNISelectClientCertificateCallback jcallback(env, callback);
+  jboolean jresult = JNI_FALSE;
+  JNI_CALL_METHOD(env, handle_, "onSelectClientCertificate",
+                  "(Lorg/cef/browser/CefBrowser;ZLjava/lang/"
+                  "String;I[Lorg/cef/security/CefX509Certificate;Lorg/cef/"
+                  "callback/CefSelectClientCertificateCallback;)Z",
+                  Boolean, jresult, jbrowser.get(),
+                  (isProxy ? JNI_TRUE : JNI_FALSE), jhost.get(), port,
+                  jcertificates, jcallback.get());
+
+  if (jresult == JNI_FALSE) {
+    // If the Java method returns "false" the callback won't be used and
+    // the reference can therefore be removed.
+    jcallback.SetTemporary();
+  }
+  env->DeleteLocalRef(jcertificates);
+  return (jresult != JNI_FALSE);
+}
+
 void RequestHandler::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
                                                TerminationStatus status) {
   // Forward request to ClientHandler to make the message_router_ happy.

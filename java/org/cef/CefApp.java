@@ -322,7 +322,7 @@ public class CefApp extends CefAppHandlerAdapter {
                 return client;
 
             default:
-                throw new IllegalStateException("Can't crate client in state " + state_);
+                throw new IllegalStateException("Can't create client in state " + state_);
         }
     }
 

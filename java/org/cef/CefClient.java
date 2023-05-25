@@ -21,6 +21,7 @@ import org.cef.callback.CefJSDialogCallback;
 import org.cef.callback.CefMenuModel;
 import org.cef.callback.CefPrintDialogCallback;
 import org.cef.callback.CefPrintJobCallback;
+import org.cef.callback.CefSelectClientCertificateCallback;
 import org.cef.handler.CefClientHandler;
 import org.cef.handler.CefContextMenuHandler;
 import org.cef.handler.CefDialogHandler;
@@ -46,6 +47,7 @@ import org.cef.network.CefRequest;
 import org.cef.network.CefRequest.TransitionType;
 import org.cef.network.CefResponse;
 import org.cef.network.CefURLRequest;
+import org.cef.security.CefX509Certificate;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -824,6 +826,16 @@ public class CefClient extends CefClientHandler
             CefBrowser browser, ErrorCode cert_error, String request_url, CefCallback callback) {
         if (requestHandler_ != null)
             return requestHandler_.onCertificateError(browser, cert_error, request_url, callback);
+        return false;
+    }
+
+    @Override
+    public boolean onSelectClientCertificate(CefBrowser browser, boolean isProxy, String host,
+            int port, final CefX509Certificate[] certificates,
+            CefSelectClientCertificateCallback callback) {
+        if (requestHandler_ != null && browser != null)
+            return requestHandler_.onSelectClientCertificate(
+                    browser, isProxy, host, port, certificates, callback);
         return false;
     }
 
